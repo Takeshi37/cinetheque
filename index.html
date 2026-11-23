@@ -295,8 +295,8 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .card.folder .f-ico svg{width:13px;height:13px}
 .card.folder .f-ico.saga{color:var(--accent2)}
 .card.folder .f-info{position:absolute;left:16px;right:16px;bottom:14px;z-index:2}
-.f-logo{display:block;max-height:72px;max-width:78%;object-fit:contain;object-position:left bottom;margin-bottom:8px;filter:drop-shadow(0 2px 10px rgba(0,0,0,.85)) drop-shadow(0 0 1px rgba(0,0,0,.6))}
-.wall .card.folder .f-logo{max-height:80px}
+.f-logo{display:block;max-height:42px;max-width:55%;object-fit:contain;object-position:left bottom;margin-bottom:8px;filter:drop-shadow(0 2px 10px rgba(0,0,0,.85)) drop-shadow(0 0 1px rgba(0,0,0,.6))}
+.wall .card.folder .f-logo{max-height:46px}
 .f-name{font-weight:800;font-size:1.2rem;line-height:1.15;text-shadow:0 2px 12px rgba(0,0,0,.85)}
 .f-sub{font-size:.78rem;color:#d3d9e0;margin-top:4px;text-shadow:0 1px 6px rgba(0,0,0,.9)}
 .f-stack{position:absolute;right:14px;top:12px;display:flex;z-index:2;padding-left:14px}
@@ -510,6 +510,11 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .qr-wrap .qr svg{width:190px;height:190px}
 .qr-wrap p{flex:1;min-width:200px;font-size:.86rem;line-height:1.6;color:#cfd5dd}
 @media (prefers-reduced-motion:reduce){ .sync-btn.busy .dot{animation:none} }
+
+.wsub{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
+.wsub-l{flex:0 0 72px;font-size:.78rem;color:var(--dim);padding-top:8px}
+.wsub .wchips{flex:1;min-width:0}
+@media (max-width:600px){ .wsub{flex-direction:column;gap:6px} .wsub-l{padding-top:0} }
 
 /* ---------- Toast ---------- */
 #toasts{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
@@ -3560,9 +3565,9 @@ let logs = readLS(LS_LOG, []);
 const saveLogs = () => writeLS(LS_LOG, logs);
 const SUP = {
   platform:{ label:'Plateforme / source', opts:['Netflix','Prime Video','Disney+','Canal+','Apple TV+','Max','Paramount+','Crunchyroll','ADN','Blu-ray 4K','Blu-ray','DVD','Fichier / Kodi','Plex','Cinéma','Télé (diffusion)'] },
-  quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','Full HD 1080p HDR','4K','4K HDR10','4K HDR10+','4K Dolby Vision','IMAX'] },
+  quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','Full HD 1080p HDR','4K','4K HDR10','4K HDR10+','4K Dolby Vision','IMAX','DCP'] },
   screen:{ label:'Écran', opts:['TV','Vidéoprojecteur','PC / écran','Tablette','Smartphone','Salle de cinéma','IMAX','Dolby Cinema','4DX'] },
-  audio:{ label:'Son', opts:['Stéréo','5.1','7.1','Dolby Atmos','DTS:X'] },
+  audio:{ label:'Son', opts:[] },
   lang:{ label:'Langue', opts:['VF','VO','VOSTFR'] }
 };
 const SUP_KEYS = Object.keys(SUP);
@@ -3644,7 +3649,7 @@ function barColor(c){
   return l < 0.18 ? '#9aa4b2' : c;
 }
 function scrIcon(v){ return /projec/i.test(v) ? SCR_ICON.proj : /pc|écran|ordi/i.test(v) ? SCR_ICON.pc : /tablette|phone|mobile/i.test(v) ? SCR_ICON.mob : /cin|imax|4dx|dolby c/i.test(v) ? SCR_ICON.cine : SCR_ICON.tv; }
-function qClass(v){ return /dolby vision|\bdv\b/i.test(v) ? 'dv' : /hdr/i.test(v) ? 'hdr' : /4k|uhd|2160|imax/i.test(v) ? 'uhd' : 'hd'; }
+function qClass(v){ return /dolby vision|\bdv\b/i.test(v) ? 'dv' : /hdr/i.test(v) ? 'hdr' : /4k|uhd|2160|imax|dcp/i.test(v) ? 'uhd' : 'hd'; }
 function supBadges(h){
   const o = [];
   if(h.platform) o.push(`<span class="sb plat" style="--c:${PCOL[h.platform] || '#39424e'}">${esc(h.platform)}</span>`);
@@ -3721,14 +3726,12 @@ const ICON_FOLDER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 function fmtMins(m){ const h = Math.floor(m/60); return `${h} h ${String(m%60).padStart(2,'0')}`; }
 function folderCardHTML(fo){
   const st = folderStats(fo), cover = folderCover(fo);
-  const posters = st.list.filter(f => f.poster).slice(0,4);
   const pct = st.n ? st.watched / st.n * 100 : 0;
   const sub = [`${st.n} titre${st.n>1?'s':''}`, st.n ? `${st.watched} vu${st.watched>1?'s':''}` : '', st.mins ? fmtMins(st.mins) + ' restantes' : ''].filter(Boolean).join(' · ');
   return `<div class="card land folder" tabindex="0" data-folder="${esc(fo.id)}" title="${esc(fo.name)}">
     ${cover ? `<img class="art" loading="lazy" src="${img(cover,'w780')}" alt="" onload="this.classList.add('ld')">` : ''}
     <div class="shade"></div>
     <div class="f-ico${fo.tmdbCollection?' saga':''}">${ICON_FOLDER}${fo.tmdbCollection ? 'Saga' : 'Dossier'}</div>
-    ${posters.length ? `<div class="f-stack">${posters.map(f => `<img loading="lazy" src="${img(f.poster,'w92')}" alt="">`).join('')}</div>` : ''}
     <div class="f-info">${folderLogo(fo) ? `<img class="f-logo" loading="lazy" src="${img(folderLogo(fo),'w500')}" alt="${esc(fo.name)}" onerror="this.outerHTML='<div class=&quot;f-name&quot;>${esc(fo.name).replace(/'/g,'&#39;')}</div>'">` : `<div class="f-name">${esc(fo.name)}</div>`}<div class="f-sub">${esc(sub)}</div></div>
     ${st.watched && st.n ? `<div class="cprog"><i style="width:${pct.toFixed(1)}%;${pct>=100?'background:var(--ok)':''}"></i></div>` : ''}
   </div>`;
@@ -5100,9 +5103,36 @@ function wHeadHTML(){
   return `${f.poster ? `<img src="${img(f.poster,'w154')}" alt="">` : '<img alt="">'}
     <div style="min-width:0"><h2>${esc(f.title || '')}</h2><p>${esc(kindLabel(wDraft))}${wIsNew ? ' · pré-rempli avec ton dernier support' : ''}</p></div>`;
 }
+/* Son façon release : codec + canaux + Atmos (ex. « DDP 5.1 Atmos », « TrueHD 7.1 Atmos », « DTS-HD MA 5.1 ») */
+const AUDIO_SUB = {
+  acodec:{ label:'Codec', opts:['AAC','AC3','DDP','TrueHD','DTS','DTS-HD MA','DTS:X','LPCM','FLAC'] },
+  ach:{ label:'Canaux', opts:['1.0','2.0','5.1','7.1'] }
+};
+function parseAudio(str){
+  let t = String(str || '').trim(), ch = '', atmos = false;
+  if(/atmos/i.test(t)){ atmos = true; t = t.replace(/(dolby\s*)?atmos/ig, ' '); }
+  if(/st[ée]r[ée]o/i.test(t)){ ch = '2.0'; t = t.replace(/st[ée]r[ée]o/ig, ' '); }
+  const m = t.match(/\b([1-9]\.[0-2])\b/); if(m){ ch = m[1]; t = t.replace(m[0], ' '); }
+  return { codec:t.replace(/\s+/g, ' ').trim(), ch, atmos };
+}
+const composeAudio = a => [a.codec, a.ch, a.atmos ? 'Atmos' : ''].filter(Boolean).join(' ');
+let wAudio = { codec:'', ch:'', atmos:false };
+function audioGroupHTML(){
+  const custom = settings.customSup || {};
+  const row = (g, cur) => {
+    const opts = AUDIO_SUB[g].opts.concat((custom[g] || []).filter(o => !AUDIO_SUB[g].opts.includes(o)));
+    if(cur && !opts.includes(cur)) opts.push(cur);
+    return `<div class="wsub"><span class="wsub-l">${AUDIO_SUB[g].label}</span><div class="wchips" data-g="${g}">${opts.map(o => `<button class="wchip${cur === o ? ' on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}${g === 'acodec' ? `<button class="wchip add" data-addc="${g}">＋ Autre</button>` : ''}</div></div>`;
+  };
+  const res = composeAudio(wAudio);
+  return `<label class="lbl">Son${res ? ` · <span style="color:var(--accent2);letter-spacing:0;text-transform:none">${esc(res)}</span>` : ''}</label>
+    ${row('acodec', wAudio.codec)}${row('ach', wAudio.ch)}
+    <div class="wsub"><span class="wsub-l">Immersif</span><div class="wchips" data-g="aatmos"><button class="wchip${wAudio.atmos ? ' on' : ''}" data-v="Atmos" style="--c:linear-gradient(90deg,#0b2a6b,#1f6fff);--tc:#fff">Dolby Atmos</button></div></div>`;
+}
 function wGroupsHTML(){
   const custom = settings.customSup || {};
   return SUP_KEYS.map(g => {
+    if(g === 'audio') return audioGroupHTML();
     const opts = SUP[g].opts.concat((custom[g] || []).filter(o => !SUP[g].opts.includes(o)));
     if(wDraft[g] && !opts.includes(wDraft[g])) opts.push(wDraft[g]);
     return `<label class="lbl">${SUP[g].label}</label><div class="wchips" data-g="${g}">${opts.map(o => {
@@ -5113,6 +5143,7 @@ function wGroupsHTML(){
   }).join('');
 }
 function showWatchDialog(){
+  wAudio = parseAudio(wDraft.audio);
   $('#wHead').innerHTML = wHeadHTML();
   const pick = !wDraft.key;
   $('#wPickWrap').hidden = !pick;
@@ -5151,8 +5182,12 @@ $('#wGroups').addEventListener('click', e => {
   const ok = e.target.closest('[data-cok]');
   if(ok){ addCustomSup(ok.dataset.cok); return; }
   const c = e.target.closest('.wchip[data-v]'); if(!c) return;
-  const g = c.closest('[data-g]').dataset.g;
-  wDraft[g] = wDraft[g] === c.dataset.v ? '' : c.dataset.v;
+  const g = c.closest('[data-g]').dataset.g, v = c.dataset.v;
+  if(g === 'acodec') wAudio.codec = wAudio.codec === v ? '' : v;
+  else if(g === 'ach') wAudio.ch = wAudio.ch === v ? '' : v;
+  else if(g === 'aatmos') wAudio.atmos = !wAudio.atmos;
+  else wDraft[g] = wDraft[g] === v ? '' : v;
+  if(g.startsWith('a') && AUDIO_SUB[g] || g === 'aatmos') wDraft.audio = composeAudio(wAudio);
   $('#wGroups').innerHTML = wGroupsHTML();
 });
 $('#wGroups').addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.dataset.cin){ e.preventDefault(); addCustomSup(e.target.dataset.cin); } });
@@ -5161,8 +5196,10 @@ function addCustomSup(g){
   if(v){
     settings.customSup = settings.customSup || {};
     const arr = settings.customSup[g] = settings.customSup[g] || [];
-    if(!arr.includes(v) && !SUP[g].opts.includes(v)) arr.push(v);
-    saveSettings(); wDraft[g] = v;
+    const base = (SUP[g] || AUDIO_SUB[g]).opts;
+    if(!arr.includes(v) && !base.includes(v)) arr.push(v);
+    saveSettings();
+    if(g === 'acodec'){ wAudio.codec = v; wDraft.audio = composeAudio(wAudio); } else wDraft[g] = v;
   }
   $('#wGroups').innerHTML = wGroupsHTML();
 }
