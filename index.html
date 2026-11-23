@@ -295,6 +295,8 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .card.folder .f-ico svg{width:13px;height:13px}
 .card.folder .f-ico.saga{color:var(--accent2)}
 .card.folder .f-info{position:absolute;left:16px;right:16px;bottom:14px;z-index:2}
+.f-logo{display:block;max-height:72px;max-width:78%;object-fit:contain;object-position:left bottom;margin-bottom:8px;filter:drop-shadow(0 2px 10px rgba(0,0,0,.85)) drop-shadow(0 0 1px rgba(0,0,0,.6))}
+.wall .card.folder .f-logo{max-height:80px}
 .f-name{font-weight:800;font-size:1.2rem;line-height:1.15;text-shadow:0 2px 12px rgba(0,0,0,.85)}
 .f-sub{font-size:.78rem;color:#d3d9e0;margin-top:4px;text-shadow:0 1px 6px rgba(0,0,0,.9)}
 .f-stack{position:absolute;right:14px;top:12px;display:flex;z-index:2;padding-left:14px}
@@ -3420,6 +3422,45 @@ function folderCover(fo){
 }
 const cleanSagaName = n => String(n || '').replace(/\s*[-–:]\s*(saga|collection)$/i, '').replace(/\s+(collection|saga)$/i, '').replace(/^(saga|collection)\s+/i, '').trim() || n;
 
+/* Logo automatique des sagas : logo de la saga TMDB s'il existe, sinon celui du premier film */
+function folderLogo(fo){
+  if(fo.custom && Object.prototype.hasOwnProperty.call(fo.custom, 'logo')) return fo.custom.logo || '';
+  return fo.autoLogo || '';
+}
+async function fetchFolderAutoLogo(fo){
+  if(!settings.key || !fo.tmdbCollection) return false;
+  const il = settings.lang.slice(0,2);
+  let logo = '';
+  try{
+    const r = await tmdb(`/collection/${fo.tmdbCollection.id}/images`, { include_image_language:`${il},en,null` });
+    logo = pickLogo(r.logos || [], il);
+  }catch(e){}
+  if(!logo){
+    const first = folderItemsOrdered(fo).find(f => f.type === 'movie');
+    if(first){
+      try{
+        const r = await tmdb(`/movie/${first.tmdbId}/images`, { include_image_language:`${il},en,null` });
+        logo = pickLogo(r.logos || [], il);
+      }catch(e){}
+      if(!logo) logo = (first.orig && first.orig.logo) || first.logo || '';
+    }
+  }
+  fo.autoLogoTried = true;
+  if(logo) fo.autoLogo = logo;
+  saveFolders();
+  return !!logo;
+}
+let autoLogoRunning = false;
+async function ensureFolderLogos(){
+  if(autoLogoRunning || !settings.key) return;
+  const todo = folders.filter(fo => fo.tmdbCollection && !fo.autoLogoTried && fo.items.length);
+  if(!todo.length) return;
+  autoLogoRunning = true;
+  let changed = false;
+  for(const fo of todo){ if(await fetchFolderAutoLogo(fo)) changed = true; }
+  autoLogoRunning = false;
+  if(changed && !$$('.modal.open').length) render(true);
+}
 async function importCollection(cid, onProgress){
   const c = await tmdb('/collection/' + cid, { language:settings.lang });
   let overview = c.overview;
@@ -3440,6 +3481,7 @@ async function importCollection(cid, onProgress){
     if(!fo.items.includes(k)) fo.items.push(k);
   }
   saveFolders();
+  if(!folderLogo(fo)) await fetchFolderAutoLogo(fo);
   return { fo, added, failed, total:parts.length, upcoming:all.length - parts.length };
 }
 
@@ -3687,7 +3729,7 @@ function folderCardHTML(fo){
     <div class="shade"></div>
     <div class="f-ico${fo.tmdbCollection?' saga':''}">${ICON_FOLDER}${fo.tmdbCollection ? 'Saga' : 'Dossier'}</div>
     ${posters.length ? `<div class="f-stack">${posters.map(f => `<img loading="lazy" src="${img(f.poster,'w92')}" alt="">`).join('')}</div>` : ''}
-    <div class="f-info">${fo.custom && fo.custom.logo ? `<img class="clogo" style="position:static;max-height:64px;max-width:70%;display:block;margin-bottom:6px" loading="lazy" src="${img(fo.custom.logo,'w300')}" alt="${esc(fo.name)}">` : `<div class="f-name">${esc(fo.name)}</div>`}<div class="f-sub">${esc(sub)}</div></div>
+    <div class="f-info">${folderLogo(fo) ? `<img class="f-logo" loading="lazy" src="${img(folderLogo(fo),'w500')}" alt="${esc(fo.name)}" onerror="this.outerHTML='<div class=&quot;f-name&quot;>${esc(fo.name).replace(/'/g,'&#39;')}</div>'">` : `<div class="f-name">${esc(fo.name)}</div>`}<div class="f-sub">${esc(sub)}</div></div>
     ${st.watched && st.n ? `<div class="cprog"><i style="width:${pct.toFixed(1)}%;${pct>=100?'background:var(--ok)':''}"></i></div>` : ''}
   </div>`;
 }
@@ -4055,6 +4097,7 @@ function render(keepHero){
   else if(view === 'history') renderHistory();
   else if(view === 'games') renderGames();
   else renderLibrary();
+  if((view === 'home' || view === 'folders' || inFolder) && folders.some(fo => fo.tmdbCollection && !fo.autoLogoTried && fo.items.length)) setTimeout(ensureFolderLogos, 300);
   const heroOk = k => k && (k.startsWith('F:') ? !!folderById(k.slice(2)) : !!itemByKey(k));
   if(view.startsWith('folder:') && !keepHero) setHero('F:' + view.slice(7), true);
   else if(!keepHero || !heroOk(currentHero)){
@@ -4134,7 +4177,7 @@ function heroFolder(id){
     `<span>${st.n} titre${st.n>1?'s':''}</span>`, `<span>${st.watched}/${st.n} vus</span>`, st.mins ? `<span>${fmtMins(st.mins)} restantes</span>` : ''].filter(Boolean).join('<span class="sep"></span>');
   const here = view === 'folder:' + id;
   $('#hero').innerHTML = `
-    <div class="hero-logo">${fo.custom && fo.custom.logo ? `<img src="${img(fo.custom.logo,'w500')}" alt="${esc(fo.name)}">` : `<h1>${esc(fo.name)}</h1>`}</div>
+    <div class="hero-logo">${folderLogo(fo) ? `<img src="${img(folderLogo(fo),'w500')}" alt="${esc(fo.name)}">` : `<h1>${esc(fo.name)}</h1>`}</div>
     <div class="meta">${meta}</div>
     <div class="hero-ov">${esc(fo.desc || (st.n ? st.list.map(f => f.title).slice(0,8).join(' · ') + (st.n > 8 ? '…' : '') : 'Dossier vide.'))}</div>
     <div class="hero-actions">
@@ -4707,11 +4750,11 @@ function artCurrent(field){
   const t = artTarget(); if(!t) return '';
   if(artCtx.kind === 'folder'){
     if(field === 'backdrop') return folderCover(t);
-    return (t.custom && t.custom[field]) || '';
+    return field === 'logo' ? folderLogo(t) : ((t.custom && t.custom[field]) || '');
   }
   return t[field] || '';
 }
-const isCustomArt = field => { const t = artTarget(); return !!(t && t.custom && t.custom[field]); };
+const isCustomArt = field => { const t = artTarget(); return !!(t && t.custom && Object.prototype.hasOwnProperty.call(t.custom, field)); };
 function setArt(field, value){
   const t = artTarget(); if(!t) return false;
   const prevCustom = Object.assign({}, t.custom || {}), prevVal = t[field];
