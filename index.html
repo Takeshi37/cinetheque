@@ -375,7 +375,9 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .bars .br .t i{display:block;height:100%;border-radius:5px;background:var(--c,var(--accent))}
 .bars .br b{text-align:right;font-weight:600;color:var(--dim)}
 .timeline{padding:0 var(--pad) 30px}
-.h-month{display:flex;align-items:baseline;gap:12px;margin:26px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);position:sticky;top:72px;z-index:2;background:linear-gradient(180deg,rgba(7,9,12,.96),rgba(7,9,12,.85));backdrop-filter:blur(8px)}
+.h-month{display:flex;align-items:baseline;gap:12px;margin:30px 0 14px;padding:0;background:none;border:0}
+.h-month h3{text-shadow:0 2px 12px rgba(0,0,0,.7)}
+.h-month span{text-shadow:0 1px 8px rgba(0,0,0,.8)}
 .h-month h3{font-size:1.1rem;font-weight:800;text-transform:capitalize}
 .h-month span{color:var(--dim);font-size:.82rem}
 .h-day{display:grid;grid-template-columns:64px 1fr;gap:16px;margin-bottom:14px}
@@ -430,7 +432,6 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
   .h-day{grid-template-columns:44px 1fr;gap:10px}
   .h-items{padding-left:12px}
   .h-act{opacity:1}
-  .h-month{top:104px}
   .hentry{gap:12px}
 }
 
@@ -511,6 +512,10 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .qr-wrap p{flex:1;min-width:200px;font-size:.86rem;line-height:1.6;color:#cfd5dd}
 @media (prefers-reduced-motion:reduce){ .sync-btn.busy .dot{animation:none} }
 
+.sb.tinted{background:var(--c);color:var(--tc);border-color:transparent}
+.wchip.tinted{border-color:rgba(255,255,255,.14)}
+.wchip.tinted:not(.on){background:rgba(255,255,255,.05)}
+.wchip.tinted.on{background:var(--c);color:var(--tc)}
 .wsub{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
 .wsub-l{flex:0 0 72px;font-size:.78rem;color:var(--dim);padding-top:8px}
 .wsub .wchips{flex:1;min-width:0}
@@ -3571,6 +3576,14 @@ const SUP = {
   lang:{ label:'Langue', opts:['VF','VO','VOSTFR'] }
 };
 const SUP_KEYS = Object.keys(SUP);
+// Couleurs des formats cinéma (qualité d'image et écran), affichées une fois sélectionnés
+const FMT_COL = {
+  'IMAX':{ bg:'linear-gradient(90deg,#003c8f,#0091ea)', fg:'#fff' },
+  'DCP':{ bg:'linear-gradient(90deg,#7a4b12,#d39a2c)', fg:'#fff8e8' },
+  'Salle de cinéma':{ bg:'linear-gradient(90deg,#6b0f1a,#b31b2e)', fg:'#fff' },
+  'Dolby Cinema':{ bg:'linear-gradient(90deg,#000,#2b2b2b)', fg:'#fff' },
+  '4DX':{ bg:'linear-gradient(90deg,#00a651,#e4002b)', fg:'#fff' }
+};
 const PCOL = { 'Netflix':'#e50914','Prime Video':'#00a8e1','Disney+':'#1f3fd1','Canal+':'#151515','Apple TV+':'#2c2c2e','Max':'#0026ff','Paramount+':'#0064ff','Crunchyroll':'#f47521','ADN':'#0096d6','Blu-ray 4K':'#101010','Blu-ray':'#0a5fd7','DVD':'#565656','Fichier / Kodi':'#1594c4','Plex':'#cc8f00','Cinéma':'#a8801a','Télé (diffusion)':'#3d3d3d' };
 const isTitleKind = h => h.kind === 'movie' || h.kind === 'title';
 function snapOf(f){ return { title:f.title, year:f.year, poster:f.poster, backdrop:f.backdrop, logo:f.logo, type:f.type, runtime:f.runtime || 0 }; }
@@ -3653,9 +3666,13 @@ function qClass(v){ return /dolby vision|\bdv\b/i.test(v) ? 'dv' : /hdr/i.test(v
 function supBadges(h){
   const o = [];
   if(h.platform) o.push(`<span class="sb plat" style="--c:${PCOL[h.platform] || '#39424e'}">${esc(h.platform)}</span>`);
-  if(h.quality) o.push(`<span class="sb q ${qClass(h.quality)}">${esc(h.quality)}</span>`);
-  if(h.screen) o.push(`<span class="sb scr">${scrIcon(h.screen)}${esc(h.screen)}</span>`);
-  if(h.audio) o.push(`<span class="sb aud">${esc(h.audio)}</span>`);
+  if(h.quality) o.push(FMT_COL[h.quality] ? `<span class="sb tinted" style="--c:${FMT_COL[h.quality].bg};--tc:${FMT_COL[h.quality].fg}">${esc(h.quality)}</span>` : `<span class="sb q ${qClass(h.quality)}">${esc(h.quality)}</span>`);
+  if(h.screen) o.push(FMT_COL[h.screen] ? `<span class="sb scr tinted" style="--c:${FMT_COL[h.screen].bg};--tc:${FMT_COL[h.screen].fg}">${scrIcon(h.screen)}${esc(h.screen)}</span>` : `<span class="sb scr">${scrIcon(h.screen)}${esc(h.screen)}</span>`);
+  if(h.audio){
+    const a = parseAudio(h.audio), base = [a.codec, a.ch].filter(Boolean).join(' ');
+    if(base) o.push(`<span class="sb aud">${esc(base)}</span>`);
+    [a.imm, a.src].filter(Boolean).forEach(v => { const c = AUDIO_COLOR[v]; o.push(`<span class="sb tinted" style="--c:${c.bg};--tc:${c.fg}">${esc(v === 'Atmos' ? 'Dolby Atmos' : v)}</span>`); });
+  }
   if(h.lang) o.push(`<span class="sb lang">${esc(h.lang)}</span>`);
   return o.join('');
 }
@@ -3999,7 +4016,7 @@ function renderHistory(){
         flushDay(); curM = m; curD = undefined;
         const ms = monthStats[m];
         const label = m === 'none' ? 'Date inconnue' : new Date(m + '-15T12:00:00').toLocaleDateString('fr-FR', { month:'long', year:'numeric' });
-        tl += `<div class="h-month"><h3>${label}</h3><span>${ms.n} visionnage${ms.n>1?'s':''}${ms.mins ? ' · ' + fmtMins(ms.mins) : ''}</span></div>`;
+        tl += `<div class="h-month"><h3>${label}</h3><span>${ms.n} visionnage${ms.n>1?'s':''}${ms.mins ? ' · ' + fmtMins(ms.mins) + ' de visionnage' : ''}</span></div>`;
       }
       if(h.date !== curD){ flushDay(); curD = h.date; }
       dayBuf.push(hentryHTML(h));
@@ -5105,18 +5122,30 @@ function wHeadHTML(){
 }
 /* Son façon release : codec + canaux + Atmos (ex. « DDP 5.1 Atmos », « TrueHD 7.1 Atmos », « DTS-HD MA 5.1 ») */
 const AUDIO_SUB = {
-  acodec:{ label:'Codec', opts:['AAC','AC3','DDP','TrueHD','DTS','DTS-HD MA','DTS:X','LPCM','FLAC'] },
+  acodec:{ label:'Codec', opts:['AAC','AC3','DDP','TrueHD','DTS','DTS-HD MA','DTS-HD HRA','LPCM','FLAC'] },
   ach:{ label:'Canaux', opts:['1.0','2.0','5.1','7.1'] }
 };
+// Boutons colorés : son immersif et source de la piste
+const AUDIO_COLOR = {
+  'Atmos':{ bg:'linear-gradient(90deg,#0b2a6b,#1f6fff)', fg:'#fff', label:'Dolby Atmos' },
+  'DTS:X':{ bg:'linear-gradient(90deg,#ffb21e,#ff7a00)', fg:'#1d1000', label:'DTS:X' },
+  'LD':{ bg:'linear-gradient(90deg,#7f7fd5,#86a8e7,#91eae4)', fg:'#0d1530', label:'LD · Laserdisc' },
+  'VHS':{ bg:'linear-gradient(90deg,#1b1b1b,#5a1010)', fg:'#ff6b5b', label:'VHS' },
+  'CD-ROM':{ bg:'linear-gradient(90deg,#a8edea,#fed6e3,#d4c1ff)', fg:'#1a1430', label:'CD-ROM' }
+};
+const AUDIO_IMM = ['Atmos','DTS:X'], AUDIO_SRC = ['LD','VHS','CD-ROM'];
 function parseAudio(str){
-  let t = String(str || '').trim(), ch = '', atmos = false;
-  if(/atmos/i.test(t)){ atmos = true; t = t.replace(/(dolby\s*)?atmos/ig, ' '); }
+  let t = ' ' + String(str || '') + ' ', ch = '', imm = '', src = '';
+  if(/atmos/i.test(t)){ imm = 'Atmos'; t = t.replace(/(dolby\s*)?atmos/ig, ' '); }
+  else if(/\bdts[:\- ]?x\b/i.test(t)){ imm = 'DTS:X'; t = t.replace(/\bdts[:\- ]?x\b/ig, ' '); }
+  const sm = t.match(/(^|\s)(LD|VHS|CD-ROM)(?=\s|$)/i);
+  if(sm){ src = AUDIO_SRC.find(x => x.toLowerCase() === sm[2].toLowerCase()); t = t.replace(sm[0], ' '); }
   if(/st[ée]r[ée]o/i.test(t)){ ch = '2.0'; t = t.replace(/st[ée]r[ée]o/ig, ' '); }
   const m = t.match(/\b([1-9]\.[0-2])\b/); if(m){ ch = m[1]; t = t.replace(m[0], ' '); }
-  return { codec:t.replace(/\s+/g, ' ').trim(), ch, atmos };
+  return { codec:t.replace(/\s+/g, ' ').trim(), ch, imm, src };
 }
-const composeAudio = a => [a.codec, a.ch, a.atmos ? 'Atmos' : ''].filter(Boolean).join(' ');
-let wAudio = { codec:'', ch:'', atmos:false };
+const composeAudio = a => [a.codec, a.ch, a.imm, a.src].filter(Boolean).join(' ');
+let wAudio = { codec:'', ch:'', imm:'', src:'' };
 function audioGroupHTML(){
   const custom = settings.customSup || {};
   const row = (g, cur) => {
@@ -5124,10 +5153,15 @@ function audioGroupHTML(){
     if(cur && !opts.includes(cur)) opts.push(cur);
     return `<div class="wsub"><span class="wsub-l">${AUDIO_SUB[g].label}</span><div class="wchips" data-g="${g}">${opts.map(o => `<button class="wchip${cur === o ? ' on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}${g === 'acodec' ? `<button class="wchip add" data-addc="${g}">＋ Autre</button>` : ''}</div></div>`;
   };
+  const colored = (g, label, list, cur) => `<div class="wsub"><span class="wsub-l">${label}</span><div class="wchips" data-g="${g}">${list.map(v => {
+    const c = AUDIO_COLOR[v];
+    return `<button class="wchip tinted${cur === v ? ' on' : ''}" data-v="${v}" style="--c:${c.bg};--tc:${c.fg}">${c.label}</button>`;
+  }).join('')}</div></div>`;
   const res = composeAudio(wAudio);
   return `<label class="lbl">Son${res ? ` · <span style="color:var(--accent2);letter-spacing:0;text-transform:none">${esc(res)}</span>` : ''}</label>
     ${row('acodec', wAudio.codec)}${row('ach', wAudio.ch)}
-    <div class="wsub"><span class="wsub-l">Immersif</span><div class="wchips" data-g="aatmos"><button class="wchip${wAudio.atmos ? ' on' : ''}" data-v="Atmos" style="--c:linear-gradient(90deg,#0b2a6b,#1f6fff);--tc:#fff">Dolby Atmos</button></div></div>`;
+    ${colored('aimm', 'Immersif', AUDIO_IMM, wAudio.imm)}
+    ${colored('asrc', 'Source piste', AUDIO_SRC, wAudio.src)}`;
 }
 function wGroupsHTML(){
   const custom = settings.customSup || {};
@@ -5137,7 +5171,10 @@ function wGroupsHTML(){
     if(wDraft[g] && !opts.includes(wDraft[g])) opts.push(wDraft[g]);
     return `<label class="lbl">${SUP[g].label}</label><div class="wchips" data-g="${g}">${opts.map(o => {
       const on = wDraft[g] === o;
-      const style = g === 'platform' && PCOL[o] ? `style="--c:${PCOL[o]};--tc:#fff"` : g === 'quality' && on ? (qClass(o) === 'hdr' ? 'style="--c:linear-gradient(90deg,#f7d774,#e3a32b);--tc:#1d1400"' : qClass(o) === 'dv' ? 'style="--c:linear-gradient(90deg,#1b1b1b,#4a3474);--tc:#efe6ff"' : '') : '';
+      const fc = (g === 'quality' || g === 'screen') && FMT_COL[o];
+      const style = g === 'platform' && PCOL[o] ? `style="--c:${PCOL[o]};--tc:#fff"`
+        : fc ? `style="--c:${fc.bg};--tc:${fc.fg}"`
+        : g === 'quality' && on ? (qClass(o) === 'hdr' ? 'style="--c:linear-gradient(90deg,#f7d774,#e3a32b);--tc:#1d1400"' : qClass(o) === 'dv' ? 'style="--c:linear-gradient(90deg,#1b1b1b,#4a3474);--tc:#efe6ff"' : '') : '';
       return `<button class="wchip${on ? ' on' : ''}" data-v="${esc(o)}" ${style}>${g === 'screen' ? scrIcon(o) : ''}${esc(o)}</button>`;
     }).join('')}<button class="wchip add" data-addc="${g}">＋ Autre</button></div>`;
   }).join('');
@@ -5185,9 +5222,10 @@ $('#wGroups').addEventListener('click', e => {
   const g = c.closest('[data-g]').dataset.g, v = c.dataset.v;
   if(g === 'acodec') wAudio.codec = wAudio.codec === v ? '' : v;
   else if(g === 'ach') wAudio.ch = wAudio.ch === v ? '' : v;
-  else if(g === 'aatmos') wAudio.atmos = !wAudio.atmos;
+  else if(g === 'aimm') wAudio.imm = wAudio.imm === v ? '' : v;
+  else if(g === 'asrc') wAudio.src = wAudio.src === v ? '' : v;
   else wDraft[g] = wDraft[g] === v ? '' : v;
-  if(g.startsWith('a') && AUDIO_SUB[g] || g === 'aatmos') wDraft.audio = composeAudio(wAudio);
+  if(AUDIO_SUB[g] || g === 'aimm' || g === 'asrc') wDraft.audio = composeAudio(wAudio);
   $('#wGroups').innerHTML = wGroupsHTML();
 });
 $('#wGroups').addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.dataset.cin){ e.preventDefault(); addCustomSup(e.target.dataset.cin); } });
