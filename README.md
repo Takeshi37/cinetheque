@@ -66,6 +66,7 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 ### Sagas & dossiers
 - Le bouton **« Importer une saga »** fonctionne pour les sagas officielles : James Bond, Harry Potter, Le Seigneur des anneaux, etc. Tous les films déjà sortis sont ajoutés, dans l'ordre de sortie.
 - Tu peux aussi créer des **dossiers manuels** pour tout le reste : Marvel, DC, un réalisateur, un thème… Un même film peut se trouver dans plusieurs dossiers.
+- Les sagas affichent automatiquement leur **logo** (modifiable dans « Images… »).
 - Les films d'un dossier sont **numérotés**. Tu peux les trier dans ton ordre perso (en faisant glisser les jaquettes), par date de sortie ou par titre.
 - Chaque dossier affiche sa progression (films vus sur le total), le temps restant et un bouton **« Prochain »**.
 
@@ -73,9 +74,9 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 - Quand tu marques un film comme vu, une petite fenêtre te demande :
   - **la date** ;
   - **la plateforme** : Netflix, Prime Video, Disney+, Canal+, Apple TV+, Max, Blu-ray 4K, Cinéma… ;
-  - **la qualité** : 1080p, 1080p HDR, 4K HDR, Dolby Vision… ;
-  - **l'écran** : TV, vidéoprojecteur, salle de cinéma, IMAX… ;
-  - **le son** : 5.1, Dolby Atmos… ;
+  - **la qualité** : 1080p, 1080p HDR10, 4K HDR, Dolby Vision, IMAX, DCP, 3D… ;
+  - **l'écran** : TV, vidéoprojecteur, IMAX, Dolby Cinema, 4DX, 3D… (au cinéma, la source « Cinéma » suffit pour une salle classique) ;
+  - **le son**, composé comme dans un nom de release : codec (DDP, TrueHD, DTS-HD MA, LPCM…), canaux (2.0, 5.1, 7.1), son immersif (Dolby Atmos ou DTS:X) et source de la piste (LD, VHS, CD-ROM). Ça donne par exemple « DDP 5.1 Atmos » ;
   - **la langue** : VF, VO, VOSTFR.
 
   Chaque liste a un bouton « + Autre » pour ajouter tes propres choix. La fenêtre est **pré-remplie avec ton dernier support**.
