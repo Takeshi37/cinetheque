@@ -3570,8 +3570,8 @@ let logs = readLS(LS_LOG, []);
 const saveLogs = () => writeLS(LS_LOG, logs);
 const SUP = {
   platform:{ label:'Plateforme / source', opts:['Netflix','Prime Video','Disney+','Canal+','Apple TV+','Max','Paramount+','Crunchyroll','ADN','Blu-ray 4K','Blu-ray','DVD','Fichier / Kodi','Plex','Cinéma','Télé (diffusion)'] },
-  quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','Full HD 1080p HDR','4K','4K HDR10','4K HDR10+','4K Dolby Vision','IMAX','DCP'] },
-  screen:{ label:'Écran', opts:['TV','Vidéoprojecteur','PC / écran','Tablette','Smartphone','Salle de cinéma','IMAX','Dolby Cinema','4DX'] },
+  quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','1080p HDR10','4K','4K HDR10','4K HDR10+','4K Dolby Vision','IMAX','DCP','3D'] },
+  screen:{ label:'Écran', opts:['TV','Vidéoprojecteur','PC / écran','Tablette','Smartphone','IMAX','Dolby Cinema','4DX','3D'] },
   audio:{ label:'Son', opts:[] },
   lang:{ label:'Langue', opts:['VF','VO','VOSTFR'] }
 };
@@ -3582,9 +3582,10 @@ const FMT_COL = {
   'DCP':{ bg:'linear-gradient(90deg,#7a4b12,#d39a2c)', fg:'#fff8e8' },
   'Salle de cinéma':{ bg:'linear-gradient(90deg,#6b0f1a,#b31b2e)', fg:'#fff' },
   'Dolby Cinema':{ bg:'linear-gradient(90deg,#000,#2b2b2b)', fg:'#fff' },
-  '4DX':{ bg:'linear-gradient(90deg,#00a651,#e4002b)', fg:'#fff' }
+  '4DX':{ bg:'linear-gradient(90deg,#00a651,#e4002b)', fg:'#fff' },
+  '3D':{ bg:'linear-gradient(90deg,#e0242f,#00b4d8)', fg:'#fff' }
 };
-const PCOL = { 'Netflix':'#e50914','Prime Video':'#00a8e1','Disney+':'#1f3fd1','Canal+':'#151515','Apple TV+':'#2c2c2e','Max':'#0026ff','Paramount+':'#0064ff','Crunchyroll':'#f47521','ADN':'#0096d6','Blu-ray 4K':'#101010','Blu-ray':'#0a5fd7','DVD':'#565656','Fichier / Kodi':'#1594c4','Plex':'#cc8f00','Cinéma':'#a8801a','Télé (diffusion)':'#3d3d3d' };
+const PCOL = { 'Netflix':'#e50914','Prime Video':'#00a8e1','Disney+':'#1f3fd1','Canal+':'#151515','Apple TV+':'#2c2c2e','Max':'#0026ff','Paramount+':'#0064ff','Crunchyroll':'#f47521','ADN':'#0096d6','Blu-ray 4K':'#101010','Blu-ray':'#0a5fd7','DVD':'#565656','Fichier / Kodi':'#1594c4','Plex':'#cc8f00','Cinéma':'linear-gradient(90deg,#6b0f1a,#b31b2e)','Télé (diffusion)':'#3d3d3d' };
 const isTitleKind = h => h.kind === 'movie' || h.kind === 'title';
 function snapOf(f){ return { title:f.title, year:f.year, poster:f.poster, backdrop:f.backdrop, logo:f.logo, type:f.type, runtime:f.runtime || 0 }; }
 function defaultSupport(f){ const src = (f && f.type === 'tv' && f.lastSupport) || settings.lastSupport || {}; const o = {}; SUP_KEYS.forEach(k => o[k] = src[k] || ''); return o; }
@@ -3657,11 +3658,12 @@ const SCR_ICON = {
   cine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 9V6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a3 3 0 0 0 0 6v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a3 3 0 0 0 0-6z"/><path d="M14 5v14" stroke-dasharray="2 2.5"/></svg>'
 };
 function barColor(c){
-  const m = /^#([0-9a-f]{6})$/i.exec(c || ''); if(!m) return 'var(--accent)';
+  const all = String(c || '').match(/#[0-9a-f]{6}/ig);
+  const m = all && /^#([0-9a-f]{6})$/i.exec(all[all.length - 1]); if(!m) return 'var(--accent)';
   const n = parseInt(m[1], 16), l = (0.2126 * (n >> 16) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
   return l < 0.18 ? '#9aa4b2' : c;
 }
-function scrIcon(v){ return /projec/i.test(v) ? SCR_ICON.proj : /pc|écran|ordi/i.test(v) ? SCR_ICON.pc : /tablette|phone|mobile/i.test(v) ? SCR_ICON.mob : /cin|imax|4dx|dolby c/i.test(v) ? SCR_ICON.cine : SCR_ICON.tv; }
+function scrIcon(v){ return /projec/i.test(v) ? SCR_ICON.proj : /pc|écran|ordi/i.test(v) ? SCR_ICON.pc : /tablette|phone|mobile/i.test(v) ? SCR_ICON.mob : /cin|imax|4dx|dolby c|\b3d\b/i.test(v) ? SCR_ICON.cine : SCR_ICON.tv; }
 function qClass(v){ return /dolby vision|\bdv\b/i.test(v) ? 'dv' : /hdr/i.test(v) ? 'hdr' : /4k|uhd|2160|imax|dcp/i.test(v) ? 'uhd' : 'hd'; }
 function supBadges(h){
   const o = [];
@@ -5599,6 +5601,7 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 ### Sagas & dossiers
 - Le bouton **« Importer une saga »** fonctionne pour les sagas officielles : James Bond, Harry Potter, Le Seigneur des anneaux, etc. Tous les films déjà sortis sont ajoutés, dans l'ordre de sortie.
 - Tu peux aussi créer des **dossiers manuels** pour tout le reste : Marvel, DC, un réalisateur, un thème… Un même film peut se trouver dans plusieurs dossiers.
+- Les sagas affichent automatiquement leur **logo** (modifiable dans « Images… »).
 - Les films d'un dossier sont **numérotés**. Tu peux les trier dans ton ordre perso (en faisant glisser les jaquettes), par date de sortie ou par titre.
 - Chaque dossier affiche sa progression (films vus sur le total), le temps restant et un bouton **« Prochain »**.
 
@@ -5606,9 +5609,9 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 - Quand tu marques un film comme vu, une petite fenêtre te demande :
   - **la date** ;
   - **la plateforme** : Netflix, Prime Video, Disney+, Canal+, Apple TV+, Max, Blu-ray 4K, Cinéma… ;
-  - **la qualité** : 1080p, 1080p HDR, 4K HDR, Dolby Vision… ;
-  - **l'écran** : TV, vidéoprojecteur, salle de cinéma, IMAX… ;
-  - **le son** : 5.1, Dolby Atmos… ;
+  - **la qualité** : 1080p, 1080p HDR10, 4K HDR, Dolby Vision, IMAX, DCP, 3D… ;
+  - **l'écran** : TV, vidéoprojecteur, IMAX, Dolby Cinema, 4DX, 3D… (au cinéma, la source « Cinéma » suffit pour une salle classique) ;
+  - **le son**, composé comme dans un nom de release : codec (DDP, TrueHD, DTS-HD MA, LPCM…), canaux (2.0, 5.1, 7.1), son immersif (Dolby Atmos ou DTS:X) et source de la piste (LD, VHS, CD-ROM). Ça donne par exemple « DDP 5.1 Atmos » ;
   - **la langue** : VF, VO, VOSTFR.
 
   Chaque liste a un bouton « + Autre » pour ajouter tes propres choix. La fenêtre est **pré-remplie avec ton dernier support**.
@@ -6116,6 +6119,20 @@ if(!settings.histMigrated){
   });
   settings.histMigrated = true; saveSettings(); saveLogs();
 }
+// Migration : « Salle de cinéma » (écran) fait doublon avec la source Cinéma ; « Full HD 1080p HDR » devient « 1080p HDR10 »
+(() => {
+  const fix = h => {
+    let c = false;
+    if(h.screen === 'Salle de cinéma'){ h.screen = ''; if(!h.platform) h.platform = 'Cinéma'; c = true; }
+    if(h.quality === 'Full HD 1080p HDR'){ h.quality = '1080p HDR10'; c = true; }
+    return c;
+  };
+  let changed = false;
+  logs.forEach(h => { if(fix(h)) changed = true; });
+  if(changed) saveLogs();
+  [settings.lastSupport].concat(films.map(f => f.lastSupport)).forEach(sp => { if(sp) fix(sp); });
+  if(settings.lastSupport) saveSettings();
+})();
 const viaSyncLink = location.hash.startsWith('#sync=');
 render();
 initSync();
