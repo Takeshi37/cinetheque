@@ -521,6 +521,45 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .wsub .wchips{flex:1;min-width:0}
 @media (max-width:600px){ .wsub{flex-direction:column;gap:6px} .wsub-l{padding-top:0} }
 
+/* ---------- Historique & barres d'outils : téléphone ---------- */
+.h-day{grid-template-columns:64px minmax(0,1fr)}
+.h-items,.hentry,.h-body{min-width:0}
+@media (max-width:600px){
+  .h-day{grid-template-columns:40px minmax(0,1fr);gap:8px}
+  .h-date b{font-size:1.4rem}
+  .h-date span{font-size:.62rem;letter-spacing:.06em}
+  .h-items{padding-left:10px}
+  .h-items::before{left:-6px}
+  .hentry{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"thumb thumb" "title act" "sub act" "sups sups" "note note";gap:4px 10px;padding:10px;align-items:center}
+  .hentry:hover,.hentry:focus-visible{transform:none}
+  .h-body{display:contents}
+  .h-thumb{grid-area:thumb;width:100%;aspect-ratio:21/9;margin-bottom:6px}
+  .h-thumb img{max-height:46%;max-width:62%}
+  .h-title{grid-area:title;font-size:.98rem;line-height:1.25}
+  .h-sub{grid-area:sub;margin:0;white-space:normal}
+  .h-sups{grid-area:sups;margin-top:8px}
+  .h-note{grid-area:note;margin-top:6px}
+  .h-act{grid-area:act;opacity:1;flex-direction:row;align-self:center}
+  .h-month{flex-wrap:wrap;gap:2px 10px;margin:22px 0 10px}
+  .h-month h3{white-space:nowrap;font-size:1.05rem}
+  .h-month span{font-size:.78rem}
+  /* Barres d'outils : grille alignée, mêmes hauteurs */
+  #content .toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:stretch}
+  #content .toolbar > *{width:100%;min-width:0;margin:0}
+  #content .toolbar .f-head,#content .toolbar .field,#content .toolbar .count{grid-column:1 / -1}
+  #content .toolbar .sel,#content .toolbar .field,#content .toolbar .seg,#content .toolbar .btn{height:44px}
+  #content .toolbar .field input{width:100%}
+  #content .toolbar .seg{display:flex}
+  #content .toolbar .seg button{flex:1;padding:6px 4px}
+  #content .toolbar .btn{justify-content:center}
+  #content .toolbar .count{text-align:right}
+  #content .toolbar [data-histadd],#content .toolbar [data-gadd],#content .toolbar #histPlat{grid-column:1 / -1}
+  .h-thumb .tt{display:none}
+  .h-top{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+  .h-stat{padding:12px}
+  .h-stat .v{font-size:1.2rem}
+}
+
 /* ---------- Toast ---------- */
 #toasts{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 .toast{background:rgba(20,24,30,.96);border:1px solid var(--line);padding:11px 18px;border-radius:10px;font-size:.88rem;box-shadow:0 12px 40px rgba(0,0,0,.5);animation:pop .25s;display:flex;align-items:center;gap:10px}
@@ -5458,7 +5497,9 @@ function applyRemote(d){
 function scheduleSync(){
   if(!syncOn()) return;
   changeSeq++;
-  if(!S().dirty){ S().dirty = true; saveSyncMeta(); }
+  S().changedAt = Date.now();
+  if(!S().dirty) S().dirty = true;
+  saveSyncMeta();
   setSyncUI('pending');
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => syncNow(), 2500);
@@ -5472,10 +5513,9 @@ async function syncNow(manual){
     const remote = await fetchRemote();
     const rrev = (remote && remote.rev) || 0, s = S();
     if(rrev > (s.base || 0)){
-      if(s.dirty){
-        const keepLocal = confirm('Ta liste a été modifiée sur un autre appareil ET sur celui-ci depuis la dernière synchronisation.\n\nOK = garder la version de CET appareil (remplace l\'autre)\nAnnuler = récupérer la version de l\'autre appareil');
-        if(keepLocal) await pushRemote(); else applyRemote(remote);
-      } else { applyRemote(remote); if(!manual) toast('Mis à jour depuis ton autre appareil', 'ok'); }
+      // Modifié des deux côtés : la version la plus récente gagne, sans rien demander
+      if(s.dirty && (s.changedAt || 0) > rrev) await pushRemote();
+      else { applyRemote(remote); if(!manual) toast('Mis à jour depuis ton autre appareil', 'ok'); }
     } else if(s.dirty || !remote){ await pushRemote(); }
     S().last = Date.now(); saveSyncMeta(); syncErr = '';
     setSyncUI('ok');
@@ -6130,8 +6170,10 @@ if(!settings.histMigrated){
   let changed = false;
   logs.forEach(h => { if(fix(h)) changed = true; });
   if(changed) saveLogs();
-  [settings.lastSupport].concat(films.map(f => f.lastSupport)).forEach(sp => { if(sp) fix(sp); });
-  if(settings.lastSupport) saveSettings();
+  let setChanged = false;
+  if(settings.lastSupport && fix(settings.lastSupport)) setChanged = true;
+  films.forEach(f => { if(f.lastSupport && fix(f.lastSupport)) setChanged = true; });
+  if(setChanged){ saveSettings(); save(); }
 })();
 const viaSyncLink = location.hash.startsWith('#sync=');
 render();
