@@ -88,6 +88,7 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 - Quand tu marques un film comme vu, une petite fenêtre te demande :
   - **la date** ;
   - **la plateforme** : Netflix, Prime Video, Disney+, Canal+, Apple TV+, Max, Blu-ray 4K, Cinéma… ;
+  - **le lecteur** : Nvidia Shield, Ugoos, Zidoo, Dune HD, Apple TV, Fire TV Stick, Xbox, PlayStation, lecteur Blu-ray 4K… ;
   - **la qualité** : 1080p, 1080p HDR10, 4K HDR, Dolby Vision, IMAX, DCP, 3D… ;
   - **l'écran** : TV, vidéoprojecteur, IMAX, Dolby Cinema, 4DX, 3D… (au cinéma, la source « Cinéma » suffit pour une salle classique) ;
   - **le son**, composé comme dans un nom de release : codec (DDP, TrueHD, DTS-HD MA, LPCM…), canaux (2.0, 5.1, 7.1), son immersif (Dolby Atmos ou DTS:X) et source de la piste (LD, VHS, CD-ROM). Ça donne par exemple « DDP 5.1 Atmos » ;
