@@ -349,7 +349,7 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .sb.q.hd{color:#cfd5dd}
 .sb.q.uhd{border-color:rgba(255,255,255,.55);color:#fff}
 .sb.q.hdr{background:linear-gradient(90deg,#f7d774,#e3a32b);color:#1d1400;border-color:transparent}
-.sb.q.hdrp{background:linear-gradient(90deg,#f7d774,#e2a04a,#b8662e);color:#1d0f00;border-color:transparent}
+.sb.q.hdrp{background:linear-gradient(90deg,#e8a33a,#e4573d 30%,#c93d8a 60%,#6d4fd8 85%,#2f6fe0);color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35);border-color:transparent}
 .sb.q.dv{background:linear-gradient(90deg,#141414,#3b2a5c);border-color:rgba(190,160,255,.5);color:#e9ddff}
 .sb.lang{color:var(--accent2)}
 .h-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:0 var(--pad);margin:6px 0 18px}
@@ -3610,7 +3610,7 @@ let logs = readLS(LS_LOG, []);
 const saveLogs = () => writeLS(LS_LOG, logs);
 const SUP = {
   platform:{ label:'Plateforme / source', opts:['Netflix','Prime Video','Disney+','Canal+','Apple TV+','Max','Paramount+','Crunchyroll','ADN','Blu-ray 4K','Blu-ray','DVD','Fichier / Kodi','Plex','Cinéma','Télé (diffusion)'] },
-  player:{ label:'Lecteur', opts:['Nvidia Shield','Ugoos','Zidoo','Dune HD','Apple TV','Fire TV Stick','Chromecast / Google TV','Appli de la TV','Lecteur Blu-ray 4K','Xbox','PlayStation'] },
+  player:{ label:'Lecteur', opts:['Shield','Ugoos','Zidoo','Dune HD','Apple TV','Fire TV Stick','Chromecast / Google TV','Appli de la TV','Lecteur Blu-ray 4K','Xbox','PlayStation'] },
   quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','1080p HDR10','4K','4K HDR10','4K HDR10+','4K Dolby Vision','IMAX','DCP','3D'] },
   screen:{ label:'Écran', opts:['TV','Vidéoprojecteur','PC / écran','Tablette','Smartphone','IMAX','Dolby Cinema','4DX','3D'] },
   audio:{ label:'Son', opts:[] },
@@ -3628,7 +3628,8 @@ const FMT_COL = {
 };
 // Couleurs des lecteurs (affichées une fois sélectionnés)
 const PLAYER_COL = {
-  'Nvidia Shield':{ bg:'#76b900', fg:'#0b1a00' },
+  'Shield':{ bg:'linear-gradient(90deg,#111,#76b900)', fg:'#fff' },
+  'Nvidia Shield':{ bg:'linear-gradient(90deg,#111,#76b900)', fg:'#fff' },
   'Apple TV':{ bg:'linear-gradient(90deg,#1d1d1f,#4a4a4f)', fg:'#fff' },
   'Fire TV Stick':{ bg:'linear-gradient(90deg,#232f3e,#ff9900)', fg:'#fff' },
   'Xbox':{ bg:'#107c10', fg:'#fff' },
@@ -5230,7 +5231,7 @@ function wGroupsHTML(){
       const style = g === 'platform' && PCOL[o] ? `style="--c:${PCOL[o]};--tc:#fff"`
         : pc ? `style="--c:${pc.bg};--tc:${pc.fg}"`
         : fc ? `style="--c:${fc.bg};--tc:${fc.fg}"`
-        : g === 'quality' && on ? (qClass(o) === 'hdrp' ? 'style="--c:linear-gradient(90deg,#f7d774,#e2a04a,#b8662e);--tc:#1d0f00"' : qClass(o) === 'hdr' ? 'style="--c:linear-gradient(90deg,#f7d774,#e3a32b);--tc:#1d1400"' : qClass(o) === 'dv' ? 'style="--c:linear-gradient(90deg,#1b1b1b,#4a3474);--tc:#efe6ff"' : '') : '';
+        : g === 'quality' && on ? (qClass(o) === 'hdrp' ? 'style="--c:linear-gradient(90deg,#e8a33a,#e4573d 30%,#c93d8a 60%,#6d4fd8 85%,#2f6fe0);--tc:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35)"' : qClass(o) === 'hdr' ? 'style="--c:linear-gradient(90deg,#f7d774,#e3a32b);--tc:#1d1400"' : qClass(o) === 'dv' ? 'style="--c:linear-gradient(90deg,#1b1b1b,#4a3474);--tc:#efe6ff"' : '') : '';
       return `<button class="wchip${on ? ' on' : ''}" data-v="${esc(o)}" ${style}>${g === 'screen' ? scrIcon(o) : g === 'player' ? PLAYER_ICON : ''}${esc(o)}</button>`;
     }).join('')}<button class="wchip add" data-addc="${g}">＋ Autre</button></div>`;
   }).join('');
@@ -5678,7 +5679,7 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 - Quand tu marques un film comme vu, une petite fenêtre te demande :
   - **la date** ;
   - **la plateforme** : Netflix, Prime Video, Disney+, Canal+, Apple TV+, Max, Blu-ray 4K, Cinéma… ;
-  - **le lecteur** : Nvidia Shield, Ugoos, Zidoo, Dune HD, Apple TV, Fire TV Stick, Xbox, PlayStation, lecteur Blu-ray 4K… ;
+  - **le lecteur** : Shield, Ugoos, Zidoo, Dune HD, Apple TV, Fire TV Stick, Xbox, PlayStation, lecteur Blu-ray 4K… ;
   - **la qualité** : 1080p, 1080p HDR10, 4K HDR, Dolby Vision, IMAX, DCP, 3D… ;
   - **l'écran** : TV, vidéoprojecteur, IMAX, Dolby Cinema, 4DX, 3D… (au cinéma, la source « Cinéma » suffit pour une salle classique) ;
   - **le son**, composé comme dans un nom de release : codec (DDP, TrueHD, DTS-HD MA, LPCM…), canaux (2.0, 5.1, 7.1), son immersif (Dolby Atmos ou DTS:X) et source de la piste (LD, VHS, CD-ROM). Ça donne par exemple « DDP 5.1 Atmos » ;
@@ -6210,6 +6211,7 @@ if(!settings.histMigrated){
     let c = false;
     if(h.screen === 'Salle de cinéma'){ h.screen = ''; if(!h.platform) h.platform = 'Cinéma'; c = true; }
     if(h.quality === 'Full HD 1080p HDR'){ h.quality = '1080p HDR10'; c = true; }
+    if(h.player === 'Nvidia Shield'){ h.player = 'Shield'; c = true; }
     return c;
   };
   let changed = false;
