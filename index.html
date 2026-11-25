@@ -414,7 +414,7 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .chk input{width:17px;height:17px;accent-color:var(--accent)}
 .wchips{display:flex;flex-wrap:wrap;gap:7px}
 .wchip{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:.82rem;font-weight:600;transition:.15s;outline:none;display:inline-flex;align-items:center;gap:6px}
-.wchip svg{width:14px;height:14px}
+.wchip svg{width:14px;height:14px;flex:0 0 auto}
 .wchip:hover,.wchip:focus-visible{border-color:rgba(255,255,255,.4)}
 .wchip.on{background:var(--c,#fff);color:var(--tc,#0b0d10);border-color:transparent;box-shadow:0 0 0 2px #fff,0 4px 14px rgba(0,0,0,.35)}
 .wchip.add{border-style:dashed;color:var(--dim)}
@@ -3610,6 +3610,7 @@ let logs = readLS(LS_LOG, []);
 const saveLogs = () => writeLS(LS_LOG, logs);
 const SUP = {
   platform:{ label:'Plateforme / source', opts:['Netflix','Prime Video','Disney+','Canal+','Apple TV+','Max','Paramount+','Crunchyroll','ADN','Blu-ray 4K','Blu-ray','DVD','Fichier / Kodi','Plex','Cinéma','Télé (diffusion)'] },
+  player:{ label:'Lecteur', opts:['Nvidia Shield','Ugoos','Zidoo','Dune HD','Apple TV','Fire TV Stick','Chromecast / Google TV','Appli de la TV','Lecteur Blu-ray 4K','Xbox','PlayStation'] },
   quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','1080p HDR10','4K','4K HDR10','4K HDR10+','4K Dolby Vision','IMAX','DCP','3D'] },
   screen:{ label:'Écran', opts:['TV','Vidéoprojecteur','PC / écran','Tablette','Smartphone','IMAX','Dolby Cinema','4DX','3D'] },
   audio:{ label:'Son', opts:[] },
@@ -3625,6 +3626,15 @@ const FMT_COL = {
   '4DX':{ bg:'linear-gradient(90deg,#00a651,#e4002b)', fg:'#fff' },
   '3D':{ bg:'linear-gradient(90deg,#e0242f,#00b4d8)', fg:'#fff' }
 };
+// Couleurs des lecteurs (affichées une fois sélectionnés)
+const PLAYER_COL = {
+  'Nvidia Shield':{ bg:'#76b900', fg:'#0b1a00' },
+  'Apple TV':{ bg:'linear-gradient(90deg,#1d1d1f,#4a4a4f)', fg:'#fff' },
+  'Fire TV Stick':{ bg:'linear-gradient(90deg,#232f3e,#ff9900)', fg:'#fff' },
+  'Xbox':{ bg:'#107c10', fg:'#fff' },
+  'PlayStation':{ bg:'linear-gradient(90deg,#00439c,#0070d1)', fg:'#fff' }
+};
+const PLAYER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="2"/><circle cx="17" cy="12" r="1" fill="currentColor"/><path d="M6 12h6"/></svg>';
 const PCOL = { 'Netflix':'#e50914','Prime Video':'#00a8e1','Disney+':'#1f3fd1','Canal+':'#151515','Apple TV+':'#2c2c2e','Max':'#0026ff','Paramount+':'#0064ff','Crunchyroll':'#f47521','ADN':'#0096d6','Blu-ray 4K':'#101010','Blu-ray':'#0a5fd7','DVD':'#565656','Fichier / Kodi':'#1594c4','Plex':'#cc8f00','Cinéma':'linear-gradient(90deg,#6b0f1a,#b31b2e)','Télé (diffusion)':'#3d3d3d' };
 const isTitleKind = h => h.kind === 'movie' || h.kind === 'title';
 function snapOf(f){ return { title:f.title, year:f.year, poster:f.poster, backdrop:f.backdrop, logo:f.logo, type:f.type, runtime:f.runtime || 0 }; }
@@ -3708,6 +3718,7 @@ function qClass(v){ return /dolby vision|\bdv\b/i.test(v) ? 'dv' : /hdr10\+|hdr1
 function supBadges(h){
   const o = [];
   if(h.platform) o.push(`<span class="sb plat" style="--c:${PCOL[h.platform] || '#39424e'}">${esc(h.platform)}</span>`);
+  if(h.player){ const c = PLAYER_COL[h.player]; o.push(c ? `<span class="sb scr tinted" style="--c:${c.bg};--tc:${c.fg}">${PLAYER_ICON}${esc(h.player)}</span>` : `<span class="sb scr">${PLAYER_ICON}${esc(h.player)}</span>`); }
   if(h.quality) o.push(FMT_COL[h.quality] ? `<span class="sb tinted" style="--c:${FMT_COL[h.quality].bg};--tc:${FMT_COL[h.quality].fg}">${esc(h.quality)}</span>` : `<span class="sb q ${qClass(h.quality)}">${esc(h.quality)}</span>`);
   if(h.screen) o.push(FMT_COL[h.screen] ? `<span class="sb scr tinted" style="--c:${FMT_COL[h.screen].bg};--tc:${FMT_COL[h.screen].fg}">${scrIcon(h.screen)}${esc(h.screen)}</span>` : `<span class="sb scr">${scrIcon(h.screen)}${esc(h.screen)}</span>`);
   if(h.audio){
@@ -4012,7 +4023,7 @@ function renderHistory(){
   const films_ = list.filter(h => isTitleKind(h) && logFilm(h).type === 'movie').length;
   const eps = list.reduce((s,h) => s + logEpCount(h), 0);
   const mins = list.reduce((s,h) => s + logRuntime(h), 0);
-  const tp = topOf(list, 'platform'), tq = topOf(list, 'quality'), ts = topOf(list, 'screen');
+  const tp = topOf(list, 'platform'), tq = topOf(list, 'quality'), ts = topOf(list, 'screen'), tpl = topOf(list, 'player');
   const hy = hist.year === 'all' ? String(new Date().getFullYear()) : hist.year;
   const toolbar = `<div class="toolbar">
       <div class="f-head"><h2>Historique</h2><span>${logs.length} visionnage${logs.length>1?'s':''} au total</span></div>
@@ -4033,7 +4044,8 @@ function renderHistory(){
   const maxP = tp.length ? tp[0][1] : 1;
   const bars = tp.length ? tp.slice(0,6).map(([k,n]) => `<div class="br"><span>${esc(k)}</span><div class="t"><i style="width:${n/maxP*100}%;--c:${barColor(PCOL[k])}"></i></div><b>${n}</b></div>`).join('')
     : '<p class="hint">Précise le support de tes visionnages pour voir la répartition ici.</p>';
-  const scr = ts.slice(0,3).map(([k,n]) => `<span class="sb scr">${scrIcon(k)}${esc(k)} · ${n}</span>`).join(' ');
+  const scr = ts.slice(0,3).map(([k,n]) => `<span class="sb scr">${scrIcon(k)}${esc(k)} · ${n}</span>`).join(' ')
+    + tpl.slice(0,3).map(([k,n]) => { const c = PLAYER_COL[k]; return ` <span class="sb scr${c ? ' tinted' : ''}"${c ? ` style="--c:${c.bg};--tc:${c.fg}"` : ''}>${PLAYER_ICON}${esc(k)} · ${n}</span>`; }).join('');
   const panels = `<div class="h-panels">
       <div class="h-panel">${heatmapHTML(hy, logs)}</div>
       <div class="h-panel"><h4><span>Supports</span></h4><div class="bars">${bars}</div>${scr ? `<div class="h-sups" style="margin-top:14px">${scr}</div>` : ''}</div>
@@ -5214,10 +5226,12 @@ function wGroupsHTML(){
     return `<label class="lbl">${SUP[g].label}</label><div class="wchips" data-g="${g}">${opts.map(o => {
       const on = wDraft[g] === o;
       const fc = (g === 'quality' || g === 'screen') && FMT_COL[o];
+      const pc = g === 'player' && PLAYER_COL[o];
       const style = g === 'platform' && PCOL[o] ? `style="--c:${PCOL[o]};--tc:#fff"`
+        : pc ? `style="--c:${pc.bg};--tc:${pc.fg}"`
         : fc ? `style="--c:${fc.bg};--tc:${fc.fg}"`
         : g === 'quality' && on ? (qClass(o) === 'hdrp' ? 'style="--c:linear-gradient(90deg,#f7d774,#e2a04a,#b8662e);--tc:#1d0f00"' : qClass(o) === 'hdr' ? 'style="--c:linear-gradient(90deg,#f7d774,#e3a32b);--tc:#1d1400"' : qClass(o) === 'dv' ? 'style="--c:linear-gradient(90deg,#1b1b1b,#4a3474);--tc:#efe6ff"' : '') : '';
-      return `<button class="wchip${on ? ' on' : ''}" data-v="${esc(o)}" ${style}>${g === 'screen' ? scrIcon(o) : ''}${esc(o)}</button>`;
+      return `<button class="wchip${on ? ' on' : ''}" data-v="${esc(o)}" ${style}>${g === 'screen' ? scrIcon(o) : g === 'player' ? PLAYER_ICON : ''}${esc(o)}</button>`;
     }).join('')}<button class="wchip add" data-addc="${g}">＋ Autre</button></div>`;
   }).join('');
 }
@@ -5664,6 +5678,7 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 - Quand tu marques un film comme vu, une petite fenêtre te demande :
   - **la date** ;
   - **la plateforme** : Netflix, Prime Video, Disney+, Canal+, Apple TV+, Max, Blu-ray 4K, Cinéma… ;
+  - **le lecteur** : Nvidia Shield, Ugoos, Zidoo, Dune HD, Apple TV, Fire TV Stick, Xbox, PlayStation, lecteur Blu-ray 4K… ;
   - **la qualité** : 1080p, 1080p HDR10, 4K HDR, Dolby Vision, IMAX, DCP, 3D… ;
   - **l'écran** : TV, vidéoprojecteur, IMAX, Dolby Cinema, 4DX, 3D… (au cinéma, la source « Cinéma » suffit pour une salle classique) ;
   - **le son**, composé comme dans un nom de release : codec (DDP, TrueHD, DTS-HD MA, LPCM…), canaux (2.0, 5.1, 7.1), son immersif (Dolby Atmos ou DTS:X) et source de la piste (LD, VHS, CD-ROM). Ça donne par exemple « DDP 5.1 Atmos » ;
