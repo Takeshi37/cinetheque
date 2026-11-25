@@ -348,6 +348,8 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .sb.plat{background:var(--c);border-color:rgba(255,255,255,.14);color:#fff}
 .sb.q.hd{color:#cfd5dd}
 .sb.q.uhd{border-color:rgba(255,255,255,.55);color:#fff}
+/* dégradé calé sur le bord extérieur : sinon il se répète sous la bordure transparente (filets aux extrémités) */
+.sb,.wchip,button,.btn,.chip{background-origin:border-box !important}
 .sb.q.hdr{background:linear-gradient(90deg,#f7d774,#e3a32b);color:#1d1400;border-color:transparent}
 .sb.q.hdrp{background:linear-gradient(90deg,#e8a33a,#e4573d 30%,#c93d8a 60%,#6d4fd8 85%,#2f6fe0);color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35);border-color:transparent}
 .sb.q.dv{background:linear-gradient(90deg,#141414,#3b2a5c);border-color:rgba(190,160,255,.5);color:#e9ddff}
@@ -3611,12 +3613,14 @@ const saveLogs = () => writeLS(LS_LOG, logs);
 const SUP = {
   platform:{ label:'Plateforme / source', opts:['Netflix','Prime Video','Disney+','Canal+','Apple TV+','Max','Paramount+','Crunchyroll','ADN','Blu-ray 4K','Blu-ray','DVD','Fichier / Kodi','Plex','Cinéma','Télé (diffusion)'] },
   player:{ label:'Lecteur', opts:['Shield','Ugoos','Zidoo','Dune HD','Apple TV','Fire TV Stick','Chromecast / Google TV','Appli de la TV','Lecteur Blu-ray 4K','Xbox','PlayStation'] },
-  quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','1080p HDR10','4K','4K HDR10','4K HDR10+','4K Dolby Vision','IMAX','DCP','3D'] },
+  quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','1080p HDR10','4K','4K HDR10','4K HDR10+','4K Dolby Vision','HDR','IMAX','DCP','3D'] },
   screen:{ label:'Écran', opts:['TV','Vidéoprojecteur','PC / écran','Tablette','Smartphone','IMAX','Dolby Cinema','4DX','3D'] },
   audio:{ label:'Son', opts:[] },
   lang:{ label:'Langue', opts:['VF','VO','VOSTFR'] }
 };
 const SUP_KEYS = Object.keys(SUP);
+// Formats de qualité cumulables avec une qualité classique (champ « qx », tableau)
+const QX = ['IMAX','DCP','3D'];
 // Couleurs des formats cinéma (qualité d'image et écran), affichées une fois sélectionnés
 const FMT_COL = {
   'IMAX':{ bg:'linear-gradient(90deg,#003c8f,#0091ea)', fg:'#fff' },
@@ -3639,7 +3643,7 @@ const PLAYER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 const PCOL = { 'Netflix':'#e50914','Prime Video':'#00a8e1','Disney+':'#1f3fd1','Canal+':'#151515','Apple TV+':'#2c2c2e','Max':'#0026ff','Paramount+':'#0064ff','Crunchyroll':'#f47521','ADN':'#0096d6','Blu-ray 4K':'#101010','Blu-ray':'#0a5fd7','DVD':'#565656','Fichier / Kodi':'#1594c4','Plex':'#cc8f00','Cinéma':'linear-gradient(90deg,#6b0f1a,#b31b2e)','Télé (diffusion)':'#3d3d3d' };
 const isTitleKind = h => h.kind === 'movie' || h.kind === 'title';
 function snapOf(f){ return { title:f.title, year:f.year, poster:f.poster, backdrop:f.backdrop, logo:f.logo, type:f.type, runtime:f.runtime || 0 }; }
-function defaultSupport(f){ const src = (f && f.type === 'tv' && f.lastSupport) || settings.lastSupport || {}; const o = {}; SUP_KEYS.forEach(k => o[k] = src[k] || ''); return o; }
+function defaultSupport(f){ const src = (f && f.type === 'tv' && f.lastSupport) || settings.lastSupport || {}; const o = {}; SUP_KEYS.forEach(k => o[k] = src[k] || ''); o.qx = (src.qx || []).slice(); return o; }
 function epName(f, s, e){ const c = seasonCache[`${f.tmdbId}:${s}:${settings.lang}`]; const x = c && c.find(y => y.e === e); return x ? x.name : ''; }
 function logEntry(f, data){
   const h = Object.assign({ id:'h' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), key:f.key, at:Date.now(), date:today(), note:'', snap:snapOf(f) }, defaultSupport(f), data);
@@ -3720,12 +3724,18 @@ function supBadges(h){
   const o = [];
   if(h.platform) o.push(`<span class="sb plat" style="--c:${PCOL[h.platform] || '#39424e'}">${esc(h.platform)}</span>`);
   if(h.player){ const c = PLAYER_COL[h.player]; o.push(c ? `<span class="sb scr tinted" style="--c:${c.bg};--tc:${c.fg}">${PLAYER_ICON}${esc(h.player)}</span>` : `<span class="sb scr">${PLAYER_ICON}${esc(h.player)}</span>`); }
+  // Ordre fixe : DCP, puis la qualité (HDR, 4K…), puis IMAX, puis 3D
+  const qxBadge = v => `<span class="sb tinted" style="--c:${FMT_COL[v].bg};--tc:${FMT_COL[v].fg}">${v}</span>`;
+  if((h.qx || []).includes('DCP')) o.push(qxBadge('DCP'));
   if(h.quality) o.push(FMT_COL[h.quality] ? `<span class="sb tinted" style="--c:${FMT_COL[h.quality].bg};--tc:${FMT_COL[h.quality].fg}">${esc(h.quality)}</span>` : `<span class="sb q ${qClass(h.quality)}">${esc(h.quality)}</span>`);
+  ['IMAX','3D'].filter(v => (h.qx || []).includes(v)).forEach(v => o.push(qxBadge(v)));
   if(h.screen) o.push(FMT_COL[h.screen] ? `<span class="sb scr tinted" style="--c:${FMT_COL[h.screen].bg};--tc:${FMT_COL[h.screen].fg}">${scrIcon(h.screen)}${esc(h.screen)}</span>` : `<span class="sb scr">${scrIcon(h.screen)}${esc(h.screen)}</span>`);
   if(h.audio){
-    const a = parseAudio(h.audio), base = [a.codec, a.ch].filter(Boolean).join(' ');
+    const a = parseAudio(h.audio), dx = a.imm === 'DTS:X', base = (dx ? [a.codec] : [a.codec, a.ch]).filter(Boolean).join(' ');
+    const tint = v => { const c = AUDIO_COLOR[v]; return `<span class="sb tinted" style="--c:${c.bg};--tc:${c.fg}">${esc(v === 'Atmos' ? 'Dolby Atmos' : v)}</span>`; };
     if(base) o.push(`<span class="sb aud">${esc(base)}</span>`);
-    [a.imm, a.src].filter(Boolean).forEach(v => { const c = AUDIO_COLOR[v]; o.push(`<span class="sb tinted" style="--c:${c.bg};--tc:${c.fg}">${esc(v === 'Atmos' ? 'Dolby Atmos' : v)}</span>`); });
+    if(dx){ o.push(tint('DTS:X')); if(a.ch) o.push(`<span class="sb aud">${esc(a.ch)}</span>`); }
+    [dx ? '' : a.imm, a.src].filter(Boolean).forEach(v => { const c = AUDIO_COLOR[v]; o.push(`<span class="sb tinted" style="--c:${c.bg};--tc:${c.fg}">${esc(v === 'Atmos' ? 'Dolby Atmos' : v)}</span>`); });
   }
   if(h.lang) o.push(`<span class="sb lang">${esc(h.lang)}</span>`);
   return o.join('');
@@ -5199,7 +5209,8 @@ function parseAudio(str){
   const m = t.match(/\b([1-9]\.[0-2])\b/); if(m){ ch = m[1]; t = t.replace(m[0], ' '); }
   return { codec:t.replace(/\s+/g, ' ').trim(), ch, imm, src };
 }
-const composeAudio = a => [a.codec, a.ch, a.imm, a.src].filter(Boolean).join(' ');
+// DTS:X est lui-même un codec : il passe avant les canaux (« DTS:X 7.1 »), Atmos reste après (« TrueHD 7.1 Atmos »)
+const composeAudio = a => (a.imm === 'DTS:X' ? [a.codec, a.imm, a.ch, a.src] : [a.codec, a.ch, a.imm, a.src]).filter(Boolean).join(' ');
 let wAudio = { codec:'', ch:'', imm:'', src:'' };
 function audioGroupHTML(){
   const custom = settings.customSup || {};
@@ -5225,7 +5236,8 @@ function wGroupsHTML(){
     const opts = SUP[g].opts.concat((custom[g] || []).filter(o => !SUP[g].opts.includes(o)));
     if(wDraft[g] && !opts.includes(wDraft[g])) opts.push(wDraft[g]);
     return `<label class="lbl">${SUP[g].label}</label><div class="wchips" data-g="${g}">${opts.map(o => {
-      const on = wDraft[g] === o;
+      // IMAX, DCP et 3D (qualité) se cumulent avec les autres qualités : champ à part « qx »
+      const on = g === 'quality' && QX.includes(o) ? (wDraft.qx || []).includes(o) : wDraft[g] === o;
       const fc = (g === 'quality' || g === 'screen') && FMT_COL[o];
       const pc = g === 'player' && PLAYER_COL[o];
       const style = g === 'platform' && PCOL[o] ? `style="--c:${PCOL[o]};--tc:#fff"`
@@ -5281,6 +5293,7 @@ $('#wGroups').addEventListener('click', e => {
   else if(g === 'ach') wAudio.ch = wAudio.ch === v ? '' : v;
   else if(g === 'aimm') wAudio.imm = wAudio.imm === v ? '' : v;
   else if(g === 'asrc') wAudio.src = wAudio.src === v ? '' : v;
+  else if(g === 'quality' && QX.includes(v)){ const a = wDraft.qx || []; wDraft.qx = a.includes(v) ? a.filter(x => x !== v) : a.concat(v); }
   else wDraft[g] = wDraft[g] === v ? '' : v;
   if(AUDIO_SUB[g] || g === 'aimm' || g === 'asrc') wDraft.audio = composeAudio(wAudio);
   $('#wGroups').innerHTML = wGroupsHTML();
@@ -5309,8 +5322,8 @@ $('#wSave').addEventListener('click', () => {
   else{ wDraft.id = 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); logs.push(wDraft); }
   saveLogs();
   // Mémorise le support (par série pour les séries, global pour les films)
-  const supp = {}; SUP_KEYS.forEach(k => supp[k] = wDraft[k] || '');
-  if(SUP_KEYS.some(k => supp[k])){
+  const supp = {}; SUP_KEYS.forEach(k => supp[k] = wDraft[k] || ''); supp.qx = (wDraft.qx || []).slice();
+  if(SUP_KEYS.some(k => supp[k]) || supp.qx.length){
     if(f && f.type === 'tv'){ f.lastSupport = supp; save(); if(!settings.lastSupport) settings.lastSupport = supp; }
     else settings.lastSupport = supp;
     saveSettings();
@@ -6212,6 +6225,10 @@ if(!settings.histMigrated){
     if(h.screen === 'Salle de cinéma'){ h.screen = ''; if(!h.platform) h.platform = 'Cinéma'; c = true; }
     if(h.quality === 'Full HD 1080p HDR'){ h.quality = '1080p HDR10'; c = true; }
     if(h.player === 'Nvidia Shield'){ h.player = 'Shield'; c = true; }
+    if(h.audio && /dts[:\- ]?x/i.test(h.audio)){ const n = composeAudio(parseAudio(h.audio)); if(n !== h.audio){ h.audio = n; c = true; } }
+    const addQx = v => { h.qx = h.qx || []; if(!h.qx.includes(v)) h.qx.push(v); };
+    if(QX.includes(h.quality)){ addQx(h.quality); h.quality = ''; c = true; }
+    if('qimax' in h){ if(h.qimax) addQx('IMAX'); delete h.qimax; c = true; }
     return c;
   };
   let changed = false;
