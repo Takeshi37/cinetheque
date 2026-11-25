@@ -5,6 +5,8 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 
 > Tu as reçu un lien vers l'app ? Va directement au [Démarrage](#démarrage-une-seule-fois-environ-10-minutes). Tu arrives sur une app **vide** : personne ne voit ta liste, et tu ne vois celle de personne.
 
+![Accueil de la Cinéthèque](captures/01-accueil.webp)
+
 ---
 
 ## Sommaire
@@ -35,6 +37,9 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 - Des statistiques en un coup d'œil : nombre de titres à voir, temps de film restant, nombre de vus, vus ce mois-ci.
 - Le bouton **« Au hasard »** (le dé) tire un film de ta liste « À voir » quand tu n'arrives pas à choisir.
 
+![Rangées de l'accueil](captures/02-accueil-rangees.webp)
+*Les rangées de l'accueil : ajoutés récemment, tes genres, soirée courte…*
+
 ### Ajouter des films et des séries
 - Il y a trois façons d'ajouter un titre :
   - **un code IMDb** (comme tt0137523), **un code TMDB** (comme 550), ou un lien IMDb ou TMDB copié depuis ton navigateur ;
@@ -42,6 +47,9 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
   - **la recherche par titre**.
 - Les jaquettes, fanarts, logos, le résumé (en français), le casting, la bande-annonce, la durée et la note sont récupérés automatiquement.
 - Tu peux ajouter un titre en « À voir » ou en « Déjà vu », et le ranger directement dans un dossier.
+
+![Liste À voir](captures/03-liste-a-voir.webp)
+*La liste « À voir », numérotée comme une file d'attente, avec filtres et tri.*
 
 ### La fiche d'un titre
 - La fiche affiche une bannière avec le logo, le résumé, le réalisateur, la date de sortie, la durée, le pays et la note.
@@ -51,6 +59,9 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
   - lui donner **ta note** (de 1 à 5 étoiles) ;
   - le **mettre en tête de file** ;
   - écrire des **notes perso** (version à regarder, qui te l'a conseillé…).
+
+![Fiche d'un film](captures/04-fiche-film.webp)
+*La fiche d'un film : logo, résumé, infos, statut, note et notes perso.*
 
 ### Séries : saison par saison, épisode par épisode
 - Chaque saison peut se déplier. Tu y trouves la liste des épisodes avec leur image, leur titre, leur date et leur résumé, et une case à cocher pour chacun.
@@ -69,6 +80,9 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 - Les sagas affichent automatiquement leur **logo** (modifiable dans « Images… »).
 - Les films d'un dossier sont **numérotés**. Tu peux les trier dans ton ordre perso (en faisant glisser les jaquettes), par date de sortie ou par titre.
 - Chaque dossier affiche sa progression (films vus sur le total), le temps restant et un bouton **« Prochain »**.
+
+![Sagas et dossiers](captures/06-sagas.webp)
+*Les sagas et dossiers, avec leur logo et leur progression.*
 
 ### Historique de visionnage
 - Quand tu marques un film comme vu, une petite fenêtre te demande :
@@ -89,16 +103,28 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
   - des filtres et une recherche.
 - Tu peux aussi **ajouter un visionnage passé** à la main et marquer un **re-visionnage**.
 
+![Historique](captures/07-historique.webp)
+*L'historique : statistiques, calendrier de l'année, supports et frise des visionnages.*
+
+![Fenêtre de visionnage](captures/08-visionnage.webp)
+*La fenêtre de visionnage : date, source, qualité, écran, son façon release et langue.*
+
 ### Jeux vidéo
 - Les jeux s'ajoutent par une recherche dans une base de plus de 500 000 jeux (RAWG), ou manuellement.
 - Chaque jeu a un statut : **À jouer**, **En cours**, **Terminé**, **100 %** ou **Abandonné**. Les dates de début et de fin se remplissent toutes seules.
 - Tu peux noter ta plateforme, ton **temps de jeu**, ta note et des notes perso.
 - La fiche du jeu affiche la note Metacritic, le studio, les plateformes, la durée moyenne et les **captures d'écran**. Chaque capture peut servir de fanart en un clic.
 
+![Jeux vidéo](captures/09-jeux-video.webp)
+*L'onglet jeux vidéo : à jouer, en cours, terminés, temps de jeu.*
+
 ### Personnaliser toutes les images (comme sur Jellyfin)
 - Pour **chaque film, série, jeu ou dossier**, tu peux changer la **jaquette**, le **fanart (bannière)** et le **logo**.
 - Tu peux choisir parmi toutes les images TMDB (toutes langues, avec un filtre « Sans texte »), **coller l'adresse d'une image** (fanart.tv, SteamGridDB, Google Images…) ou **importer une image depuis ton PC**.
 - Tes choix sont conservés même après une mise à jour des fiches. Le bouton « Rétablir par défaut » revient à l'image d'origine.
+
+![Éditeur d'images](captures/05-editeur-images.webp)
+*L'éditeur d'images : toutes les jaquettes, fanarts et logos de TMDB, filtrables par langue.*
 
 ### Une vraie app, synchronisée
 - Tu l'installes sur ton **téléphone** et ton **PC** avec une icône, et elle s'ouvre en plein écran.
