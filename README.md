@@ -170,6 +170,9 @@ Tes données sont gardées dans ton propre compte GitHub, gratuit, dans un espac
 
 > Le bouton « Créer ma propre copie sur mon GitHub » ne sert pas pour utiliser l'app. Il te donne ta propre adresse, indépendante de celle qu'on t'a envoyée (voir [Problèmes fréquents](#problèmes-fréquents)).
 
+![Paramètres](captures/10-parametres.webp)
+*Les paramètres : clés API, synchronisation GitHub et application en ligne.*
+
 ---
 
 ## Installer l'app sur ton téléphone et ton PC
