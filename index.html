@@ -621,7 +621,10 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 }
 /* Téléphone à l'horizontale : le logo ne mange plus l'écran */
 @media (orientation:landscape) and (max-height:520px){
-  #hero{min-height:0;padding-top:calc(96px + env(safe-area-inset-top))}
+  /* onglets sur la même ligne que le logo et les icônes, comme sur PC (défilement horizontal si besoin) */
+  #topbar{flex-wrap:nowrap}
+  nav#tabs{order:0;width:auto;flex:1 1 auto;min-width:0}
+  #hero{min-height:0;padding-top:calc(78px + env(safe-area-inset-top))}
   .hero-logo{height:auto;margin-bottom:10px}
   .hero-logo img{max-height:70px;max-width:38vw}
   .hero-logo h1{font-size:2rem}
