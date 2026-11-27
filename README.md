@@ -87,7 +87,7 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 ### Historique de visionnage
 - Quand tu marques un film comme vu, une petite fenêtre te demande :
   - **la date** ;
-  - **la plateforme** : Netflix, Prime Video, Disney+, Canal+, Apple TV+, Max, Bravia Core, Blu-ray 4K, Cinéma… ;
+  - **la plateforme** : Netflix, Prime Video, Disney+, Canal+, Apple TV+, Max, Bravia Core, Movies Anywhere, Blu-ray 4K, Cinéma… ;
   - **le lecteur** : Shield, Ugoos, Zidoo, Dune HD, Apple TV, Fire TV Stick, Xbox, PlayStation, lecteur Blu-ray 4K… ;
   - **la qualité** : 1080p, 1080p HDR10, 4K HDR, Dolby Vision, IMAX, DCP, 3D… ;
   - **l'écran** : TV, vidéoprojecteur, IMAX, Dolby Cinema, 4DX, 3D… (au cinéma, la source « Cinéma » suffit pour une salle classique) ;
