@@ -598,6 +598,38 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
   .d-hero-in{padding:22px}
   .d-body{padding:8px 22px 26px}
 }
+
+/* ---------- Téléphone : textes, logo et boutons plus compacts ---------- */
+@media (max-width:600px){
+  .hero-logo{height:auto;margin-bottom:12px}
+  .hero-logo img{max-height:78px;max-width:76%}
+  .hero-logo h1{font-size:1.9rem}
+  .meta{font-size:.82rem;gap:6px 10px;margin-bottom:10px}
+  .hero-tagline{font-size:.84rem;margin-bottom:6px}
+  .hero-ov{font-size:.86rem;line-height:1.5;-webkit-line-clamp:3}
+  .hero-actions{gap:8px;margin-top:14px}
+  .hero-actions .btn,.d-links .btn{padding:8px 13px;font-size:.82rem}
+  .hero-actions .btn svg,.d-links .btn svg{width:15px;height:15px}
+  .stats{flex-wrap:nowrap;gap:10px;justify-content:space-between;margin:4px 0 20px}
+  .stat{min-width:0}
+  .stat .v{font-size:1.1rem}
+  .stat .l{font-size:.55rem;letter-spacing:.06em;white-space:nowrap}
+  .d-logo img{max-height:84px;max-width:76%}
+  .d-logo h1{font-size:1.9rem}
+  .d-ov{font-size:.88rem;line-height:1.6}
+  .d-facts .v{font-size:.86rem}
+}
+/* Téléphone à l'horizontale : le logo ne mange plus l'écran */
+@media (orientation:landscape) and (max-height:520px){
+  #hero{min-height:0;padding-top:calc(96px + env(safe-area-inset-top))}
+  .hero-logo{height:auto;margin-bottom:10px}
+  .hero-logo img{max-height:70px;max-width:38vw}
+  .hero-logo h1{font-size:2rem}
+  .hero-ov{-webkit-line-clamp:2;font-size:.88rem}
+  .hero-actions{margin-top:12px}
+  .d-hero{min-height:240px}
+  .d-logo img{max-height:70px;max-width:38vw}
+}
 </style>
 </head>
 <body>
