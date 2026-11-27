@@ -405,6 +405,8 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .h-body{flex:1;min-width:0}
 .h-title{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .h-title .yr{color:var(--dim);font-weight:500;font-size:.85rem}
+.h-title .rwrow{flex-basis:100%;display:block;line-height:1}
+.h-title .rwp{display:inline-block;margin:0 0 2px;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:rgba(138,92,255,.18);color:#c7b2ff}
 .h-title .rw{font-size:.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:rgba(138,92,255,.2);color:#c7b2ff}
 .h-sub{font-size:.82rem;color:var(--dim);margin:3px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .h-sups{display:flex;flex-wrap:wrap;gap:6px}
@@ -3653,16 +3655,16 @@ const LS_LOG = 'cinetheque.history.v1';
 let logs = readLS(LS_LOG, []);
 const saveLogs = () => writeLS(LS_LOG, logs);
 const SUP = {
-  platform:{ label:'Plateforme / source', opts:['Netflix','Prime Video','Disney+','Canal+','Apple TV+','Max','Paramount+','Crunchyroll','ADN','Bravia Core','Movies Anywhere','Blu-ray 4K','Blu-ray','DVD','Fichier / Kodi','Plex','Cinéma','Télé (diffusion)'] },
+  platform:{ label:'Plateforme / source', opts:['Netflix','Prime Video','Disney+','Canal+','Apple TV+','Max','Paramount+','Crunchyroll','ADN','Bravia Core','Movies Anywhere','Blu-ray 4K','Blu-ray','DVD','Kodi','Plex','Cinéma','Télé (diffusion)'] },
   player:{ label:'Lecteur', opts:['Shield','Ugoos','Zidoo','Dune HD','Apple TV','Fire TV Stick','Chromecast / Google TV','Appli de la TV','Lecteur Blu-ray 4K','Xbox','PlayStation'] },
-  quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','1080p HDR10','4K','4K HDR10','4K HDR10+','4K Dolby Vision','HDR','IMAX','DCP','3D'] },
+  quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','1080p HDR10','4K','4K HDR10','4K HDR10+','4K Dolby Vision','HDR','IMAX','Open Matte','DCP','3D'] },
   screen:{ label:'Écran', opts:['TV','Vidéoprojecteur','PC / écran','Tablette','Smartphone','IMAX','Dolby Cinema','4DX','3D'] },
   audio:{ label:'Son', opts:[] },
   lang:{ label:'Langue', opts:['VF','VO','VOSTFR'] }
 };
 const SUP_KEYS = Object.keys(SUP);
 // Formats de qualité cumulables avec une qualité classique (champ « qx », tableau)
-const QX = ['IMAX','DCP','3D'];
+const QX = ['IMAX','Open Matte','DCP','3D'];
 // Couleurs des formats cinéma (qualité d'image et écran), affichées une fois sélectionnés
 const FMT_COL = {
   'IMAX':{ bg:'linear-gradient(90deg,#003c8f,#0091ea)', fg:'#fff' },
@@ -3670,7 +3672,8 @@ const FMT_COL = {
   'Salle de cinéma':{ bg:'linear-gradient(90deg,#6b0f1a,#b31b2e)', fg:'#fff' },
   'Dolby Cinema':{ bg:'linear-gradient(90deg,#000,#2b2b2b)', fg:'#fff' },
   '4DX':{ bg:'linear-gradient(90deg,#00a651,#e4002b)', fg:'#fff' },
-  '3D':{ bg:'linear-gradient(90deg,#e0242f,#00b4d8)', fg:'#fff' }
+  '3D':{ bg:'linear-gradient(90deg,#e0242f,#00b4d8)', fg:'#fff' },
+  'Open Matte':{ bg:'linear-gradient(90deg,#0b4f4a,#19b3a2)', fg:'#fff' }
 };
 // Couleurs des lecteurs (affichées une fois sélectionnés)
 const PLAYER_COL = {
@@ -3684,8 +3687,19 @@ const PLAYER_COL = {
 const PLAYER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="2"/><circle cx="17" cy="12" r="1" fill="currentColor"/><path d="M6 12h6"/></svg>';
 // Nom court affiché dans l'historique
 const PLAT_SHORT = { 'Movies Anywhere':'MA' };
-const PCOL = { 'Netflix':'#e50914','Prime Video':'#00a8e1','Disney+':'#1f3fd1','Canal+':'#151515','Apple TV+':'#2c2c2e','Max':'#0026ff','Paramount+':'#0064ff','Crunchyroll':'#f47521','ADN':'#0096d6','Bravia Core':'linear-gradient(90deg,#000,#3e4d63)','Movies Anywhere':'linear-gradient(90deg,#2a5bff,#7b3ff2)','Blu-ray 4K':'#101010','Blu-ray':'#0a5fd7','DVD':'#565656','Fichier / Kodi':'#1594c4','Plex':'#cc8f00','Cinéma':'linear-gradient(90deg,#6b0f1a,#b31b2e)','Télé (diffusion)':'#3d3d3d' };
+const PCOL = { 'Netflix':'#e50914','Prime Video':'#00a8e1','Disney+':'#1f3fd1','Canal+':'#151515','Apple TV+':'#2c2c2e','Max':'#0026ff','Paramount+':'#0064ff','Crunchyroll':'#f47521','ADN':'#0096d6','Bravia Core':'linear-gradient(90deg,#000,#3e4d63)','Movies Anywhere':'linear-gradient(90deg,#2a5bff,#7b3ff2)','Blu-ray 4K':'#101010','Blu-ray':'#0a5fd7','DVD':'#565656','Kodi':'#1594c4','Plex':'#cc8f00','Cinéma':'linear-gradient(90deg,#6b0f1a,#b31b2e)','Télé (diffusion)':'#3d3d3d' };
 const isTitleKind = h => h.kind === 'movie' || h.kind === 'title';
+// Numéro du visionnage (films / séries entières) : détecté automatiquement dans l'historique, par date
+function viewNo(h){
+  if(!isTitleKind(h)) return 0;
+  const same = logs.filter(x => x.key === h.key && isTitleKind(x)).sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.at || 0) - (b.at || 0));
+  return same.indexOf(h) + 1;
+}
+function viewLabel(h){
+  const n = viewNo(h);
+  if(n >= 2) return `${n}ᵉ visionnage`;
+  return isTitleKind(h) && h.rewatch ? 'Re-visionnage' : '';
+}
 function snapOf(f){ return { title:f.title, year:f.year, poster:f.poster, backdrop:f.backdrop, logo:f.logo, type:f.type, runtime:f.runtime || 0 }; }
 function defaultSupport(f){ const src = (f && f.type === 'tv' && f.lastSupport) || settings.lastSupport || {}; const o = {}; SUP_KEYS.forEach(k => o[k] = src[k] || ''); o.qx = (src.qx || []).slice(); return o; }
 function epName(f, s, e){ const c = seasonCache[`${f.tmdbId}:${s}:${settings.lang}`]; const x = c && c.find(y => y.e === e); return x ? x.name : ''; }
@@ -3769,10 +3783,10 @@ function supBadges(h){
   if(h.platform) o.push(`<span class="sb plat" style="--c:${PCOL[h.platform] || '#39424e'}" title="${esc(h.platform)}">${esc(PLAT_SHORT[h.platform] || h.platform)}</span>`);
   if(h.player){ const c = PLAYER_COL[h.player]; o.push(c ? `<span class="sb scr tinted" style="--c:${c.bg};--tc:${c.fg}">${PLAYER_ICON}${esc(h.player)}</span>` : `<span class="sb scr">${PLAYER_ICON}${esc(h.player)}</span>`); }
   // Ordre fixe : DCP, puis la qualité (HDR, 4K…), puis IMAX, puis 3D
-  const qxBadge = v => `<span class="sb tinted" style="--c:${FMT_COL[v].bg};--tc:${FMT_COL[v].fg}">${v}</span>`;
+  const qxBadge = v => `<span class="sb tinted" style="--c:${FMT_COL[v].bg};--tc:${FMT_COL[v].fg}" title="${v}">${v === 'Open Matte' ? 'OM' : v}</span>`;
   if((h.qx || []).includes('DCP')) o.push(qxBadge('DCP'));
   if(h.quality) o.push(FMT_COL[h.quality] ? `<span class="sb tinted" style="--c:${FMT_COL[h.quality].bg};--tc:${FMT_COL[h.quality].fg}">${esc(h.quality)}</span>` : `<span class="sb q ${qClass(h.quality)}">${esc(h.quality)}</span>`);
-  ['IMAX','3D'].filter(v => (h.qx || []).includes(v)).forEach(v => o.push(qxBadge(v)));
+  ['IMAX','Open Matte','3D'].filter(v => (h.qx || []).includes(v)).forEach(v => o.push(qxBadge(v)));
   if(h.screen) o.push(FMT_COL[h.screen] ? `<span class="sb scr tinted" style="--c:${FMT_COL[h.screen].bg};--tc:${FMT_COL[h.screen].fg}">${scrIcon(h.screen)}${esc(h.screen)}</span>` : `<span class="sb scr">${scrIcon(h.screen)}${esc(h.screen)}</span>`);
   if(h.audio){
     const a = parseAudio(h.audio), dx = a.imm === 'DTS:X', base = (dx ? [a.codec] : [a.codec, a.ch]).filter(Boolean).join(' ');
@@ -4062,7 +4076,7 @@ function hentryHTML(h){
   return `<div class="hentry" tabindex="0" data-hentry="${esc(h.id)}" data-key="${esc(h.key)}">
     <div class="h-thumb" ${thumb}>${logo}</div>
     <div class="h-body">
-      <div class="h-title">${esc(f.title || 'Titre retiré')}${f.year ? `<span class="yr">${esc(f.year)}</span>` : ''}${h.rewatch ? '<span class="rw">Re-visionnage</span>' : ''}${stars}</div>
+      <div class="h-title">${viewLabel(h) ? `<span class="rwrow"><span class="rwp">${viewLabel(h)}</span></span>` : ''}${esc(f.title || 'Titre retiré')}${f.year ? `<span class="yr">${esc(f.year)}</span>` : ''}${stars}</div>
       <div class="h-sub">${esc(kindLabel(h))}</div>
       <div class="h-sups">${sups}</div>
       ${h.note ? `<div class="h-note">« ${esc(h.note)} »</div>` : ''}
@@ -5207,7 +5221,7 @@ function renderDetailHistory(k){
   const list = sortLogs(logs.filter(h => h.key === k));
   const rows = list.slice(0, 6).map(h => `<div class="dh" data-hid="${esc(h.id)}" title="Modifier">
       <span class="d">${h.date ? fmtDate(h.date) : 'Date inconnue'}</span>
-      <span class="k">${esc(kindLabel(h))}${h.rewatch ? ' · re-visionnage' : ''}</span>
+      <span class="k">${esc(kindLabel(h))}${viewLabel(h) ? ' · ' + viewLabel(h).toLowerCase() : ''}</span>
       <span class="h-sups">${supBadges(h)}</span></div>`).join('');
   box.innerHTML = `<label class="lbl">Historique de visionnage${list.length ? ` · ${list.length}` : ''}</label>
     ${rows ? `<div class="dh-list">${rows}</div>` : '<p class="hint" style="margin:0 0 10px">Aucun visionnage enregistré pour ce titre.</p>'}
@@ -6273,6 +6287,7 @@ if(!settings.histMigrated){
     if(h.screen === 'Salle de cinéma'){ h.screen = ''; if(!h.platform) h.platform = 'Cinéma'; c = true; }
     if(h.quality === 'Full HD 1080p HDR'){ h.quality = '1080p HDR10'; c = true; }
     if(h.player === 'Nvidia Shield'){ h.player = 'Shield'; c = true; }
+    if(h.platform === 'Fichier / Kodi'){ h.platform = 'Kodi'; c = true; }
     if(h.audio && /dts[:\- ]?x/i.test(h.audio)){ const n = composeAudio(parseAudio(h.audio)); if(n !== h.audio){ h.audio = n; c = true; } }
     const addQx = v => { h.qx = h.qx || []; if(!h.qx.includes(v)) h.qx.push(v); };
     if(QX.includes(h.quality)){ addQx(h.quality); h.quality = ''; c = true; }
