@@ -263,7 +263,8 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .chev{color:var(--dim);font-size:1.4rem;line-height:1;transition:transform .2s;width:14px;text-align:center}
 .season.open .chev{transform:rotate(90deg)}
 .s-eps{border-top:1px solid var(--line);background:rgba(0,0,0,.18)}
-.ep{display:flex;align-items:center;gap:14px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04)}
+.ep{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"chk img info btn";align-items:center;gap:14px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04)}
+.ep>.ep-check{grid-area:chk}.ep>img,.ep>.ph{grid-area:img}.ep>.ep-info{grid-area:info}.ep>.ep-upto{grid-area:btn}
 .ep:last-child{border-bottom:0}
 .ep-check{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);display:grid;place-items:center;flex:0 0 auto;color:transparent;transition:.15s;outline:none}
 .ep-check svg{width:15px;height:15px}
@@ -282,9 +283,15 @@ footer .tmdb{font-weight:800;letter-spacing:.08em;background:linear-gradient(90d
 .ep-upto{opacity:0;transition:opacity .15s}
 .ep:hover .ep-upto,.ep-upto:focus-visible{opacity:1}
 @media (max-width:900px){
-  .ep img,.ep .ph{width:84px}
+  /* Téléphone : case + vignette + texte ; « Vu jusqu'ici » passe sous le texte, en petit */
+  .ep{grid-template-columns:28px 128px minmax(0,1fr);grid-template-areas:"chk img info" "chk img btn";column-gap:10px;row-gap:6px;padding:10px 12px;align-items:start}
+  .ep>.ep-check{align-self:center;width:28px;height:28px}
+  .ep img,.ep .ph{width:128px;border-radius:6px}
+  .ep-t{font-size:.82rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .ep-n{display:block;margin:0 0 1px;font-size:.72rem}
+  .ep-m{font-size:.7rem;margin:3px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ep-ov{display:none}
-  .ep-upto{opacity:1;padding:6px 8px;font-size:.72rem}
+  .ep>.ep-upto{opacity:1;justify-self:start;align-self:end;padding:3px 9px;font-size:.68rem;border-radius:999px;min-height:0;line-height:1.4}
   .s-all span{display:none}
   .s-head{gap:10px;padding:10px}
 }
@@ -3611,7 +3618,7 @@ const LS_LOG = 'cinetheque.history.v1';
 let logs = readLS(LS_LOG, []);
 const saveLogs = () => writeLS(LS_LOG, logs);
 const SUP = {
-  platform:{ label:'Plateforme / source', opts:['Netflix','Prime Video','Disney+','Canal+','Apple TV+','Max','Paramount+','Crunchyroll','ADN','Bravia Core','Blu-ray 4K','Blu-ray','DVD','Fichier / Kodi','Plex','Cinéma','Télé (diffusion)'] },
+  platform:{ label:'Plateforme / source', opts:['Netflix','Prime Video','Disney+','Canal+','Apple TV+','Max','Paramount+','Crunchyroll','ADN','Bravia Core','Movies Anywhere','Blu-ray 4K','Blu-ray','DVD','Fichier / Kodi','Plex','Cinéma','Télé (diffusion)'] },
   player:{ label:'Lecteur', opts:['Shield','Ugoos','Zidoo','Dune HD','Apple TV','Fire TV Stick','Chromecast / Google TV','Appli de la TV','Lecteur Blu-ray 4K','Xbox','PlayStation'] },
   quality:{ label:'Qualité d\'image', opts:['SD','HD 720p','Full HD 1080p','1080p HDR10','4K','4K HDR10','4K HDR10+','4K Dolby Vision','HDR','IMAX','DCP','3D'] },
   screen:{ label:'Écran', opts:['TV','Vidéoprojecteur','PC / écran','Tablette','Smartphone','IMAX','Dolby Cinema','4DX','3D'] },
@@ -3640,7 +3647,9 @@ const PLAYER_COL = {
   'PlayStation':{ bg:'linear-gradient(90deg,#00439c,#0070d1)', fg:'#fff' }
 };
 const PLAYER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="2"/><circle cx="17" cy="12" r="1" fill="currentColor"/><path d="M6 12h6"/></svg>';
-const PCOL = { 'Netflix':'#e50914','Prime Video':'#00a8e1','Disney+':'#1f3fd1','Canal+':'#151515','Apple TV+':'#2c2c2e','Max':'#0026ff','Paramount+':'#0064ff','Crunchyroll':'#f47521','ADN':'#0096d6','Bravia Core':'linear-gradient(90deg,#000,#3e4d63)','Blu-ray 4K':'#101010','Blu-ray':'#0a5fd7','DVD':'#565656','Fichier / Kodi':'#1594c4','Plex':'#cc8f00','Cinéma':'linear-gradient(90deg,#6b0f1a,#b31b2e)','Télé (diffusion)':'#3d3d3d' };
+// Nom court affiché dans l'historique
+const PLAT_SHORT = { 'Movies Anywhere':'MA' };
+const PCOL = { 'Netflix':'#e50914','Prime Video':'#00a8e1','Disney+':'#1f3fd1','Canal+':'#151515','Apple TV+':'#2c2c2e','Max':'#0026ff','Paramount+':'#0064ff','Crunchyroll':'#f47521','ADN':'#0096d6','Bravia Core':'linear-gradient(90deg,#000,#3e4d63)','Movies Anywhere':'linear-gradient(90deg,#2a5bff,#7b3ff2)','Blu-ray 4K':'#101010','Blu-ray':'#0a5fd7','DVD':'#565656','Fichier / Kodi':'#1594c4','Plex':'#cc8f00','Cinéma':'linear-gradient(90deg,#6b0f1a,#b31b2e)','Télé (diffusion)':'#3d3d3d' };
 const isTitleKind = h => h.kind === 'movie' || h.kind === 'title';
 function snapOf(f){ return { title:f.title, year:f.year, poster:f.poster, backdrop:f.backdrop, logo:f.logo, type:f.type, runtime:f.runtime || 0 }; }
 function defaultSupport(f){ const src = (f && f.type === 'tv' && f.lastSupport) || settings.lastSupport || {}; const o = {}; SUP_KEYS.forEach(k => o[k] = src[k] || ''); o.qx = (src.qx || []).slice(); return o; }
@@ -3722,7 +3731,7 @@ function scrIcon(v){ return /projec/i.test(v) ? SCR_ICON.proj : /pc|écran|ordi/
 function qClass(v){ return /dolby vision|\bdv\b/i.test(v) ? 'dv' : /hdr10\+|hdr10plus/i.test(v) ? 'hdrp' : /hdr/i.test(v) ? 'hdr' : /4k|uhd|2160|imax|dcp/i.test(v) ? 'uhd' : 'hd'; }
 function supBadges(h){
   const o = [];
-  if(h.platform) o.push(`<span class="sb plat" style="--c:${PCOL[h.platform] || '#39424e'}">${esc(h.platform)}</span>`);
+  if(h.platform) o.push(`<span class="sb plat" style="--c:${PCOL[h.platform] || '#39424e'}" title="${esc(h.platform)}">${esc(PLAT_SHORT[h.platform] || h.platform)}</span>`);
   if(h.player){ const c = PLAYER_COL[h.player]; o.push(c ? `<span class="sb scr tinted" style="--c:${c.bg};--tc:${c.fg}">${PLAYER_ICON}${esc(h.player)}</span>` : `<span class="sb scr">${PLAYER_ICON}${esc(h.player)}</span>`); }
   // Ordre fixe : DCP, puis la qualité (HDR, 4K…), puis IMAX, puis 3D
   const qxBadge = v => `<span class="sb tinted" style="--c:${FMT_COL[v].bg};--tc:${FMT_COL[v].fg}">${v}</span>`;
@@ -3733,9 +3742,13 @@ function supBadges(h){
   if(h.audio){
     const a = parseAudio(h.audio), dx = a.imm === 'DTS:X', base = (dx ? [a.codec] : [a.codec, a.ch]).filter(Boolean).join(' ');
     const tint = v => { const c = AUDIO_COLOR[v]; return `<span class="sb tinted" style="--c:${c.bg};--tc:${c.fg}">${esc(v === 'Atmos' ? 'Dolby Atmos' : v)}</span>`; };
-    if(base) o.push(`<span class="sb aud">${esc(base)}</span>`);
-    if(dx){ o.push(tint('DTS:X')); if(a.ch) o.push(`<span class="sb aud">${esc(a.ch)}</span>`); }
-    [dx ? '' : a.imm, a.src].filter(Boolean).forEach(v => { const c = AUDIO_COLOR[v]; o.push(`<span class="sb tinted" style="--c:${c.bg};--tc:${c.fg}">${esc(v === 'Atmos' ? 'Dolby Atmos' : v)}</span>`); });
+    // Atmos avec codec/canaux : un seul badge « DDP 5.1 Atmos » dans la couleur Atmos ; Atmos seul reste « Dolby Atmos »
+    const at = a.imm === 'Atmos' && !!base;
+    if(at){ const c = AUDIO_COLOR.Atmos; o.push(`<span class="sb tinted" style="--c:${c.bg};--tc:${c.fg}">${esc(base)} Atmos</span>`); }
+    else if(base) o.push(`<span class="sb aud">${esc(base)}</span>`);
+    // DTS:X + canaux : un seul badge orange « DTS:X 7.1 » (le codec éventuel, ex. LPCM, reste à part)
+    if(dx){ const c = AUDIO_COLOR['DTS:X']; o.push(`<span class="sb tinted" style="--c:${c.bg};--tc:${c.fg}">DTS:X${a.ch ? ' ' + esc(a.ch) : ''}</span>`); }
+    [dx || at ? '' : a.imm, a.src].filter(Boolean).forEach(v => { const c = AUDIO_COLOR[v]; o.push(`<span class="sb tinted" style="--c:${c.bg};--tc:${c.fg}">${esc(v === 'Atmos' ? 'Dolby Atmos' : v)}</span>`); });
   }
   if(h.lang) o.push(`<span class="sb lang">${esc(h.lang)}</span>`);
   return o.join('');
@@ -5691,7 +5704,7 @@ Une seule app, sur ton PC et ton téléphone, synchronisée entre les deux. Grat
 ### Historique de visionnage
 - Quand tu marques un film comme vu, une petite fenêtre te demande :
   - **la date** ;
-  - **la plateforme** : Netflix, Prime Video, Disney+, Canal+, Apple TV+, Max, Bravia Core, Blu-ray 4K, Cinéma… ;
+  - **la plateforme** : Netflix, Prime Video, Disney+, Canal+, Apple TV+, Max, Bravia Core, Movies Anywhere, Blu-ray 4K, Cinéma… ;
   - **le lecteur** : Shield, Ugoos, Zidoo, Dune HD, Apple TV, Fire TV Stick, Xbox, PlayStation, lecteur Blu-ray 4K… ;
   - **la qualité** : 1080p, 1080p HDR10, 4K HDR, Dolby Vision, IMAX, DCP, 3D… ;
   - **l'écran** : TV, vidéoprojecteur, IMAX, Dolby Cinema, 4DX, 3D… (au cinéma, la source « Cinéma » suffit pour une salle classique) ;
